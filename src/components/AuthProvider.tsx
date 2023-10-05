@@ -4,48 +4,49 @@ import Context from '../internal/hooks/Context'
 import DescopeReactNative from '../internal/modules/descopeModule'
 import type { DescopeConfig, DescopeSession } from '../types'
 
-const AuthProvider: FC<{ config: DescopeConfig; children?: JSX.Element }> = ({ config, children }) => {
+const AuthProvider: FC<DescopeConfig & { children?: JSX.Element }> = ({ projectId, baseUrl, logger, fetch, children }) => {
   const [session, setSession] = useState<DescopeSession>()
 
   const sdk = useMemo(() => {
-    return createSdk(config)
-  }, [config])
+    return createSdk(projectId, baseUrl, logger, fetch)
+  }, [projectId, baseUrl, logger, fetch])
 
   // clear session if the sdk changes
   useEffect(() => {
     return () => {
       setSession(undefined)
     }
-  }, [config.projectId])
+  }, [projectId])
 
   // load session on first load
   useEffect(() => {
-    config.logger?.log('searching for persisted session')
-    DescopeReactNative.loadItem(config.projectId)
+    logger?.log('searching for persisted session')
+    DescopeReactNative.loadItem(projectId)
       .then((loaded) => {
         if (loaded?.length) {
-          config.logger?.log('persisted session found')
+          logger?.log('persisted session found')
           const parsed = JSON.parse(loaded) as DescopeSession
           setSession(parsed)
         } else {
-          config.logger?.log('no persisted session found')
+          logger?.log('no persisted session found')
           setSession(undefined)
         }
       })
       .catch((e) => {
-        config.logger?.error('failed to search for persisted session', e)
+        logger?.error('failed to search for persisted session', e)
       })
-  }, [config.projectId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId])
 
   const context = useMemo(
     () => ({
       sdk: sdk,
-      logger: config.logger,
-      projectId: config.projectId,
+      logger: logger,
+      projectId: projectId,
       session,
       setSession,
     }),
-    [sdk, config.logger, config.projectId, session, setSession],
+    [sdk, logger, projectId, session, setSession],
   )
 
   return <Context.Provider value={context}>{children}</Context.Provider>
