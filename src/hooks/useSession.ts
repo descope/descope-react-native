@@ -17,13 +17,13 @@ const useSession = (): DescopeSessionManager => {
     if (!jwtResponse.user) throw new Error(`Cannot manage JWTResponse without user`)
 
     logger?.log('managing new session')
-    const session: DescopeSession = {
+    const updatedSession: DescopeSession = {
       sessionJwt: jwtResponse.sessionJwt,
       refreshJwt: jwtResponse.refreshJwt,
       user: jwtResponse.user,
     }
-    await DescopeReactNative.saveItem(projectId, JSON.stringify(session))
-    setSession(session)
+    await DescopeReactNative.saveItem(projectId, JSON.stringify(updatedSession))
+    setSession(updatedSession)
   }
 
   const updateTokens = async (sessionJwt: string, refreshJwt: string) => {
@@ -44,9 +44,9 @@ const useSession = (): DescopeSessionManager => {
   const updateUser = async (userResponse: UserResponse) => {
     if (session) {
       logger?.log('updating current session user')
-      const updateSession = { ...session, user: userResponse }
-      await DescopeReactNative.saveItem(projectId, JSON.stringify(updateSession))
-      setSession(updateSession)
+      const updatedSession = { ...session, user: userResponse }
+      await DescopeReactNative.saveItem(projectId, JSON.stringify(updatedSession))
+      setSession(updatedSession)
     }
   }
 
@@ -63,14 +63,14 @@ const useSession = (): DescopeSessionManager => {
     const resp = await sdk.refresh(session.refreshJwt)
     if (resp.data) {
       const { sessionJwt, refreshJwt } = resp.data
-      const updateSession = {
+      const updatedSession = {
         sessionJwt,
         refreshJwt: refreshJwt && refreshJwt !== '' ? refreshJwt : session.refreshJwt,
         user: session.user,
       }
-      await DescopeReactNative.saveItem(projectId, JSON.stringify(updateSession))
-      setSession(updateSession)
-      return updateSession
+      await DescopeReactNative.saveItem(projectId, JSON.stringify(updatedSession))
+      setSession(updatedSession)
+      return updatedSession
     }
     return session
   }

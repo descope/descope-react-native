@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import * as React from 'react'
 
 import { AuthProvider } from 'descope-react-native'
@@ -21,7 +22,7 @@ const logger = {
 
 export default function App() {
   return (
-    <AuthProvider config={{ projectId: '<my-project-id>', logger }}>
+    <AuthProvider projectId={'<my-project-id>'} logger={logger}>
       <View style={{ flex: 1, backgroundColor: '#CEEEE4' }}>
         <Flow />
       </View>

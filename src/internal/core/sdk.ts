@@ -1,12 +1,14 @@
 import createCoreSdk from '@descope/core-js-sdk'
 import { version } from '../../../package.json'
-import type { DescopeConfig } from '../../types'
 
 export type Sdk = ReturnType<typeof createSdk>
 export type SdkLogger = Parameters<typeof createCoreSdk>[0]['logger']
-export type SdkFetch = Parameters<typeof createCoreSdk>[0]['fetch']
+export type SdkConfig = Parameters<typeof createCoreSdk>
 
-export const createSdk = (config: DescopeConfig) => createCoreSdk({ ...config, baseHeaders })
+export const createSdk = (...config: SdkConfig) => {
+  config?.[0] && (config[0].baseHeaders = baseHeaders)
+  return createCoreSdk(...config)
+}
 
 const baseHeaders = {
   'x-descope-sdk-name': 'reactnative',

@@ -35,7 +35,7 @@ const useFlow = (): DescopeFlow => {
       })
       return promise
     },
-    [setCurrentFlowUrl, setCurrentCodeVerifier, setPendingFlowResolution],
+    [setCurrentFlowUrl, setCurrentCodeVerifier, setPendingFlowResolution, sdk, logger],
   )
 
   const resume = useCallback(
@@ -44,7 +44,7 @@ const useFlow = (): DescopeFlow => {
       if (!currentFlowUrl) return pendingFlowResolution?.reject('no ongoing flow waiting to resume')
       await DescopeReactNative.resumeFlow(currentFlowUrl, incomingUrl)
     },
-    [currentFlowUrl],
+    [currentFlowUrl, pendingFlowResolution, logger],
   )
 
   const exchange = useCallback(
@@ -65,7 +65,7 @@ const useFlow = (): DescopeFlow => {
       setCurrentCodeVerifier(undefined)
       setPendingFlowResolution(undefined)
     },
-    [currentCodeVerifier, pendingFlowResolution],
+    [currentCodeVerifier, pendingFlowResolution, sdk, logger],
   )
 
   return { start, resume, exchange }

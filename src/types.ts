@@ -1,31 +1,4 @@
 import type { JWTResponse, SdkResponse, UserResponse } from '@descope/core-js-sdk'
-import type { SdkFetch, SdkLogger } from './internal/core/sdk'
-
-/** The configuration of the Descope SDK. */
-export interface DescopeConfig {
-  /** The id of the Descope project. */
-  projectId: string
-  /** The base URL of the Descope server. */
-  baseUrl?: string
-  /**
-   * An optional object to handle logging in the Descope SDK.
-   * The default value of this property is `undefined` and thus logging will be completely
-   * disabled. During development if you encounter any issues you can provide your own
-   * to enable logging.
-   */
-  logger?: SdkLogger
-  /**
-   * An optional object to override how HTTP requests are performed.
-   *
-   * The default value of this property is always `undefined`, and the SDK uses its own
-   * internal client object to perform HTTP requests.
-   *
-   * This property can be useful to test code that uses the Descope SDK without any
-   * network requests actually taking place. In most other cases there shouldn't be
-   * any need to use it.
-   */
-  fetch?: SdkFetch
-}
 
 /**
  * The `DescopeSession` class represents a successful sign in operation.
