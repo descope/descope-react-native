@@ -8,7 +8,7 @@ const useDescope = (): Sdk => {
   return useMemo(() => {
     if (!sdk) {
       // In case the SDK is not initialized, we want to throw an error when the SDK functions are actually called
-      return new Proxy(createSdk({ projectId: 'dummy' }), proxyThrowHandler) as Sdk
+      return new Proxy(createSdk('dummy-project-id'), proxyThrowHandler) as Sdk
     }
     return sdk
   }, [sdk])
