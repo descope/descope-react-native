@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo, useState, type FC } from 'react'
-import { createSdk } from '../internal/core/sdk'
+import { createSdk, type SdkConfig } from '../internal/core/sdk'
 import Context from '../internal/hooks/Context'
 import DescopeReactNative from '../internal/modules/descopeModule'
-import type { DescopeConfig, DescopeSession } from '../types'
+import type { DescopeSession } from '../types'
 
-const AuthProvider: FC<DescopeConfig & { children?: JSX.Element }> = ({ projectId, baseUrl, logger, fetch, children }) => {
+type Props = Pick<SdkConfig[0], 'projectId' | 'baseUrl' | 'logger' | 'fetch'> & { children?: JSX.Element }
+const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, children }) => {
   const [session, setSession] = useState<DescopeSession>()
 
   const sdk = useMemo(() => {
-    return createSdk(projectId, baseUrl, logger, fetch)
+    return createSdk({ projectId, baseUrl, logger, fetch })
   }, [projectId, baseUrl, logger, fetch])
 
   // clear session if the sdk changes
