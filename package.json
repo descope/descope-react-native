@@ -141,7 +141,7 @@
     ]
   },
   "dependencies": {
-    "@descope/core-js-sdk": "^1.7.3",
+    "@descope/core-js-sdk": "^2.5.1",
     "base-64": "^1.0.0"
   }
 }
