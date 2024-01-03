@@ -68,6 +68,7 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
 
     // launch via chrome custom tabs
     launchUri(reactContext, uri)
+    promise.resolve(flowUrl)
   }
 
   // Storage
