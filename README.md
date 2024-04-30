@@ -14,6 +14,12 @@ Install the package with:
 npm i --save @descope/react-native-sdk
 ```
 
+When targeting iOS, make sure to navigate into the `ios` folder and install the dependencies:
+
+```bash
+pod install
+```
+
 ## Usage
 
 ### Wrap your app with Auth Provider
