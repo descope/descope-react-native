@@ -120,13 +120,16 @@ export interface DescopeSessionManager {
  * are run using a sandboxed browser view.
  *
  * Under the hood, this authentication function uses platform specific classes to
- * display the flows: `ASWebAuthenticationSession` on iOS and `Chrome Custom Tabs` on Android.
+ * display the flows: `ASWebAuthenticationSession` on iOS and `Custom Tabs` on Android.
  * If targeting Android you need to set up `Android App Links` in order to communicate back
  * to the application. Read more about it in the README under the `Running Flows` section.
  */
 export interface DescopeFlow {
   /**
    * Starts a user authentication flow.
+   *
+   * If the user has an **active session** and this function was provided with `FlowAuthentication`,
+   * this flow will run with the user logged in.
    *
    * The flow screens are presented in a sandboxed browser view that's displayed by this
    * function call. The function then waits until the authentication completed successfully,
@@ -136,7 +139,7 @@ export interface DescopeFlow {
    * that needs to be called by Descope in order to return a result from the flow.
    * This result URI should then be processed by the [exchange] function.
    */
-  start(flowUrl: string, deepLinkUrl: string): Promise<SdkResponse<JWTResponse>>
+  start(flowUrl: string, deepLinkUrl: string, authentication?: FlowAuthentication): Promise<SdkResponse<JWTResponse>>
   /**
    * Resumes an ongoing flow after a redirect back to the app with an [incomingUri].
    * This is required for *Magic Link only* at this stage.
@@ -155,4 +158,12 @@ export interface DescopeFlow {
    * The [JwtResponse] will be returned to the original call to [start].
    */
   exchange(incomingUrl: string): Promise<void>
+}
+
+/** Provide authentication info if the flow is being run by an already authenticated user. */
+export type FlowAuthentication = {
+  /** The flow ID about to be run. */
+  flowId: string
+  /** The refresh JWT from an active descope session */
+  refreshJwt: string
 }

@@ -27,9 +27,7 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
   // Flow
 
   @ReactMethod
-  fun startFlow(flowUrl: String, deepLinkUrl: String, promise: Promise) {
-    if (flowUrl.isEmpty()) return promise.reject("empty_url", "'flowUrl' is required when calling startFlow")
-
+  fun prepFlow(promise: Promise) {
     // create some random bytes
     val randomBytes = ByteArray(32)
     Random.nextBytes(randomBytes)
@@ -44,6 +42,14 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
     // codeChallenge == base64(sha256(randomBytes))
     val codeChallenge = String(Base64.encode(hashed, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
 
+    // resolve the promise with the code verifier and challenge
+    promise.resolve(Arguments.makeNativeMap(mapOf("codeVerifier" to codeVerifier, "codeChallenge" to codeChallenge)))
+  }
+
+  @ReactMethod
+  fun startFlow(flowUrl: String, deepLinkUrl: String, codeChallenge: String, promise: Promise) {
+    if (flowUrl.isEmpty()) return promise.reject("empty_url", "'flowUrl' is required when calling startFlow")
+
     // embed into url parameters
     val uri = Uri.parse(flowUrl).buildUpon()
       .appendQueryParameter("ra-callback", deepLinkUrl)
@@ -54,8 +60,8 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
     // launch via chrome custom tabs
     launchUri(reactContext, uri)
 
-    // resolve the promise with the code verifier
-    promise.resolve(Arguments.makeNativeMap(mapOf("codeVerifier" to codeVerifier)))
+    // resolve the promise
+    promise.resolve("")
   }
 
   @ReactMethod
