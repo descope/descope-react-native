@@ -11,6 +11,8 @@ The Descope SDK for React Native provides convenient access to Descope for an ap
 Install the package with:
 
 ```bash
+yarn add @descope/react-native-sdk
+# or
 npm i --save @descope/react-native-sdk
 ```
 

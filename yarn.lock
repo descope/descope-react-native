@@ -1186,13 +1186,12 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@descope/core-js-sdk@^2.5.1":
-  version "2.10.0"
-  resolved "https://registry.yarnpkg.com/@descope/core-js-sdk/-/core-js-sdk-2.10.0.tgz#d01eb12e8e9e9ad8c079c2c46e17ff4a94f69eb6"
-  integrity sha512-CzSRX9aVml4pEfBQrXfRlnDtALApjMawnKC7gDWRJ0stdRhokNSd5qIFF6z0FN/Y5pco/60PHmssaHAssVVs7g==
+"@descope/core-js-sdk@2.15.1":
+  version "2.15.1"
+  resolved "https://registry.yarnpkg.com/@descope/core-js-sdk/-/core-js-sdk-2.15.1.tgz#726567dcbe21539b1028669396ffd9451a745fc4"
+  integrity sha512-IrqxrxLLRsOtq/q8KRrcNwAjzt4d8e45DVGVl3ri6TStVOmCbIZm6TUDF4cmvDBD5pqNUIHA+1kHOi+N4tCS4A==
   dependencies:
     jwt-decode "3.1.2"
-    lodash.get "4.4.2"
 
 "@eslint-community/eslint-utils@^4.2.0":
   version "4.4.0"
@@ -6296,11 +6295,6 @@ lodash.escaperegexp@^4.1.2:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/lodash.escaperegexp/-/lodash.escaperegexp-4.1.2.tgz#64762c48618082518ac3df4ccf5d5886dae20347"
   integrity sha512-TM9YBvyC84ZxE3rgfefxUWiQKLilstD6k7PTGt6wfbtXF8ixIJLOL3VYyV/z+ZiPLsVxAsKAFVwWlWeb2Y8Yyw==
-
-lodash.get@4.4.2:
-  version "4.4.2"
-  resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
-  integrity sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==
 
 lodash.ismatch@^4.4.0:
   version "4.4.0"
