@@ -8,7 +8,7 @@ type PrepFlowResponse = {
 const { DescopeReactNative } = NativeModules
 interface DescopeNative {
   prepFlow(): Promise<PrepFlowResponse>
-  startFlow(flowUrl: string, deepLinkUrl: string, codeChallenge: string): Promise<string>
+  startFlow(flowUrl: string, deepLinkUrl: string, backupCustomScheme: string, codeChallenge: string): Promise<string>
   resumeFlow(flowUrl: string, incomingUrl: string): Promise<void>
   loadItem(key: string): Promise<string>
   saveItem(key: string, value: string): Promise<string>

@@ -7,6 +7,7 @@ RCT_EXTERN_METHOD(prepFlow: (RCTPromiseResolveBlock)resolve
 
 RCT_EXTERN_METHOD(startFlow:(NSString *)urlString
                  withDeepLinkURL:(NSString *)deepLinkURL
+                 withBackupCustomScheme: (NSString *)backupCustomScheme
                  withCodeChallenge:(NSString *)codeChallenge
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)

@@ -27,8 +27,8 @@ class DescopeReactNative: NSObject {
         resolve(["codeVerifier": codeVerifier, "codeChallenge": codeChallenge])
     }
 
-    @objc(startFlow:withDeepLinkURL:withCodeChallenge:withResolver:withRejecter:)
-    func startFlow(_ flowURL: String, deepLinkURL: String, codeChallenge: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    @objc(startFlow:withDeepLinkURL:withBackupCustomScheme:withCodeChallenge:withResolver:withRejecter:)
+    func startFlow(_ flowURL: String, deepLinkURL: String, backupCustomScheme: String, codeChallenge: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         guard !flowURL.isEmpty else { return reject("empty_url", "'flowURL' is required when calling startFlow", nil) }
         self.resolve = resolve
         self.reject = reject
