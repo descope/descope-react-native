@@ -176,7 +176,7 @@ useEffect(() => {
         <category android:name="android.intent.category.BROWSABLE" />
 
         <!-- replace with something unique. this will only be used as a backup for Opera and some other browsers. -->
-        <data android:scheme="myapp" android:host="auth"  />
+        <data android:scheme="myapp" android:host="auth" />
     </intent-filter>
 </activity>
 ```

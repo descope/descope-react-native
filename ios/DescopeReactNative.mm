@@ -2,12 +2,12 @@
 
 @interface RCT_EXTERN_MODULE(DescopeReactNative, NSObject)
 
-RCT_EXTERN_METHOD(prepFlow: (RCTPromiseResolveBlock)resolve
-                 withRejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(prepFlowWithResolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(startFlow:(NSString *)urlString
                  withDeepLinkURL:(NSString *)deepLinkURL
-                 withBackupCustomScheme: (NSString *)backupCustomScheme
+                 withBackupCustomScheme:(NSString *)backupCustomScheme
                  withCodeChallenge:(NSString *)codeChallenge
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
