@@ -19,7 +19,7 @@ const useFlow = (): DescopeFlow => {
   }>()
 
   const start = useCallback(
-    async (flowUrl: string, deepLinkUrl?: string, authentication?: FlowAuthentication) => {
+    async (flowUrl: string, deepLinkUrl?: string, backupCustomScheme?: string, authentication?: FlowAuthentication) => {
       logger?.log('starting flow')
       setCurrentFlowUrl(flowUrl)
 
@@ -31,7 +31,7 @@ const useFlow = (): DescopeFlow => {
         await primeFlow(sdk, resp.codeChallenge, authentication)
       }
 
-      const callbackUrl = await DescopeReactNative.startFlow(flowUrl, deepLinkUrl || '', resp.codeChallenge)
+      const callbackUrl = await DescopeReactNative.startFlow(flowUrl, deepLinkUrl || '', backupCustomScheme || '', resp.codeChallenge)
       if (Platform.OS === 'ios') {
         return exchangeForJwtResponse(sdk, resp.codeVerifier, callbackUrl)
       }

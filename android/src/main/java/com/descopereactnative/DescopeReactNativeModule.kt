@@ -47,15 +47,18 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
   }
 
   @ReactMethod
-  fun startFlow(flowUrl: String, deepLinkUrl: String, codeChallenge: String, promise: Promise) {
+  fun startFlow(flowUrl: String, deepLinkUrl: String, backupCustomScheme: String, codeChallenge: String, promise: Promise) {
     if (flowUrl.isEmpty()) return promise.reject("empty_url", "'flowUrl' is required when calling startFlow")
 
     // embed into url parameters
-    val uri = Uri.parse(flowUrl).buildUpon()
+    val uriBuilder = Uri.parse(flowUrl).buildUpon()
       .appendQueryParameter("ra-callback", deepLinkUrl)
       .appendQueryParameter("ra-challenge", codeChallenge)
       .appendQueryParameter("ra-initiator", "android")
-      .build()
+    if (backupCustomScheme.isNotEmpty()) {
+        uriBuilder.appendQueryParameter("ra-backup-callback", backupCustomScheme)
+    }
+    val uri = uriBuilder.build()
 
     // launch via chrome custom tabs
     launchUri(reactContext, uri)

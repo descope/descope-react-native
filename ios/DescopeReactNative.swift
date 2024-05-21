@@ -16,7 +16,7 @@ class DescopeReactNative: NSObject {
 
     // Flow
 
-    @objc(prepFlow:withRejecter:)
+    @objc(prepFlowWithResolver:rejecter:)
     func prepFlow(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         guard let randomBytes = Data(randomBytesCount: 32) else { return reject("code_generation", "Error generating random bytes", nil) }
         let hashedBytes = Data(SHA256.hash(data: randomBytes))
@@ -27,8 +27,8 @@ class DescopeReactNative: NSObject {
         resolve(["codeVerifier": codeVerifier, "codeChallenge": codeChallenge])
     }
 
-    @objc(startFlow:withDeepLinkURL:withCodeChallenge:withResolver:withRejecter:)
-    func startFlow(_ flowURL: String, deepLinkURL: String, codeChallenge: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    @objc(startFlow:withDeepLinkURL:withBackupCustomScheme:withCodeChallenge:withResolver:withRejecter:)
+    func startFlow(_ flowURL: String, deepLinkURL: String, backupCustomScheme: String, codeChallenge: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         guard !flowURL.isEmpty else { return reject("empty_url", "'flowURL' is required when calling startFlow", nil) }
         self.resolve = resolve
         self.reject = reject
