@@ -230,9 +230,9 @@ const { session, manageSession } = useSession()
 
 try {
   // When starting a flow for an authenticated user, provide the authentication info
-  let flowAuthentication = undefined
+  let flowAuthentication
   if (session) {
-    const flowAuthentication = {
+    flowAuthentication = {
       flowId: 'flow-id',
       refreshJwt: session.refreshJwt,
     }

@@ -160,9 +160,9 @@ export interface DescopeFlow {
   exchange(incomingUrl: string): Promise<void>
 }
 
-/** Provide authentication info if the flow is being run by an already authenticated user. */
+/** Provide authentication info if the flow is being run by a user that's already authenticated. */
 export type FlowAuthentication = {
-  /** The flow ID about to be run. */
+  /** The ID of the flow about to be run. */
   flowId: string
   /** The refresh JWT from an active descope session */
   refreshJwt: string
