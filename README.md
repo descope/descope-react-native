@@ -226,9 +226,18 @@ Run the flow by calling the flow start function:
 import { useFlow } from '@descope/react-native-sdk'
 
 const flow = useFlow()
+const { session, manageSession } = useSession()
 
 try {
-  const resp = await flow.start('<URL_FOR_FLOW_IN_SETUP_#1>', '<URL_FOR_APP_LINK_IN_SETUP_#2>')
+  // When starting a flow for an authenticated user, provide the authentication info
+  let flowAuthentication
+  if (session) {
+    flowAuthentication = {
+      flowId: 'flow-id',
+      refreshJwt: session.refreshJwt,
+    }
+  }
+  const resp = await flow.start('<URL_FOR_FLOW_IN_SETUP_#1>', '<URL_FOR_APP_LINK_IN_SETUP_#2>', flowAuthentication)
   await manageSession(resp.data)
 } catch (e) {
   // handle errors
