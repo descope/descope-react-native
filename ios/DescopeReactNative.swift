@@ -4,6 +4,7 @@ import AuthenticationServices
 
 private let redirectScheme = "descopeauth"
 private let redirectURL = "\(redirectScheme)://flow"
+private let maxKeyWindowAttempts = 10
 
 @objc(DescopeReactNative)
 class DescopeReactNative: NSObject {
@@ -35,8 +36,8 @@ class DescopeReactNative: NSObject {
 
         do {
             let initialURL = try prepareInitialRequest(for: flowURL, with: codeChallenge)
-            DispatchQueue.main.async {
-                self.startFlow(initialURL)
+            Task { @MainActor in
+                await self.startFlow(initialURL)
             }
         } catch {
             reject("flow_setup", "Flow setup failed", error)
@@ -53,19 +54,16 @@ class DescopeReactNative: NSObject {
         }
 
         guard let resumeURL = components.url else { return reject("flow_resume", "unable to construct resuming url params", nil) }
-
-        DispatchQueue.main.async {
-            self.startFlow(resumeURL)
+        Task { @MainActor in
+            await self.startFlow(resumeURL)
         }
         resolve(nil)
     }
 
     @MainActor
-    private func startFlow(_ url: URL) {
-        guard defaultContextProvider.findKeyWindow() != nil else {
-            reject?("flow_failed", "unable to find key window", nil)
-            return
-        }
+    private func startFlow(_ url: URL) async {
+        await defaultContextProvider.waitKeyWindow(attempts: maxKeyWindowAttempts)
+
         let session = ASWebAuthenticationSession(url: url, callbackURLScheme: redirectScheme) { [self] callbackURL, error in
             if let error {
                 switch error {
@@ -157,6 +155,15 @@ private func prepareInitialRequest(for flowURL: String, with codeChallenge: Stri
 }
 
 private class DefaultContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding {
+    func waitKeyWindow(attempts: Int) async {
+        for _ in 1...attempts {
+            if let window = findKeyWindow() {
+                return
+            }
+            try? await Task.sleep(nanoseconds: 100 * NSEC_PER_MSEC)
+        }
+    }
+
     func findKeyWindow() -> UIWindow? {
         let scene = UIApplication.shared.connectedScenes
             .filter { $0.activationState == .foregroundActive }
@@ -170,7 +177,7 @@ private class DefaultContextProvider: NSObject, ASWebAuthenticationPresentationC
     }
 
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        return ASPresentationAnchor()
+        return findKeyWindow() ?? ASPresentationAnchor()
     }
 }
 
