@@ -4,7 +4,7 @@ import AuthenticationServices
 
 private let redirectScheme = "descopeauth"
 private let redirectURL = "\(redirectScheme)://flow"
-private let maxKeyWindowAttempts = 20
+private let maxKeyWindowAttempts = 10
 
 @objc(DescopeReactNative)
 class DescopeReactNative: NSObject {
@@ -36,8 +36,8 @@ class DescopeReactNative: NSObject {
 
         do {
             let initialURL = try prepareInitialRequest(for: flowURL, with: codeChallenge)
-            DispatchQueue.main.async {
-                self.startFlow(initialURL)
+            Task { @MainActor in
+                await self.startFlow(initialURL)
             }
         } catch {
             reject("flow_setup", "Flow setup failed", error)
@@ -54,63 +54,40 @@ class DescopeReactNative: NSObject {
         }
 
         guard let resumeURL = components.url else { return reject("flow_resume", "unable to construct resuming url params", nil) }
-
-        DispatchQueue.main.async {
-            self.startFlow(resumeURL)
+        Task { @MainActor in
+            await self.startFlow(resumeURL)
         }
         resolve(nil)
     }
 
     @MainActor
-    private func startFlow(_ url: URL) {
-        Task { @MainActor in
-          var completed = false
-          var attempts = 0
-          do {
-            attempts += 1
-            while !completed {
-              // make sure key window is available
-              if let keyWindow = defaultContextProvider.findKeyWindow() {
-                completed = true
-                continue
-              }
+    private func startFlow(_ url: URL) async {
+        await defaultContextProvider.waitKeyWindow(attempts: maxKeyWindowAttempts)
 
-              // search for a maximum of 20 attempts * 100ms
-              guard attempts < maxKeyWindowAttempts else { throw DescopeError.flowFailed("Exceeded maximum attempts to find key window") }
-
-              // retry again in 100ms
-              try await Task.sleep(nanoseconds: 100 * NSEC_PER_MSEC)
+        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: redirectScheme) { [self] callbackURL, error in
+            if let error {
+                switch error {
+                case ASWebAuthenticationSessionError.canceledLogin:
+                    reject?("flow_canceled", "Authentication canceled by user", nil)
+                    cleanUp()
+                    return
+                case ASWebAuthenticationSessionError.presentationContextInvalid,
+                    ASWebAuthenticationSessionError.presentationContextNotProvided:
+                    // not handled for now
+                    fallthrough
+                default:
+                    reject?("flow_failed", "Flow failed unexpectedly", nil)
+                    cleanUp()
+                    return
+                }
             }
-          } catch {
-            reject?("flow_failed", "unable to find key window", nil)
-            return
-          }
-
-          let session = ASWebAuthenticationSession(url: url, callbackURLScheme: redirectScheme) { [self] callbackURL, error in
-              if let error {
-                  switch error {
-                  case ASWebAuthenticationSessionError.canceledLogin:
-                      reject?("flow_canceled", "Authentication canceled by user", nil)
-                      cleanUp()
-                      return
-                  case ASWebAuthenticationSessionError.presentationContextInvalid,
-                      ASWebAuthenticationSessionError.presentationContextNotProvided:
-                      // not handled for now
-                      fallthrough
-                  default:
-                      reject?("flow_failed", "Flow failed unexpectedly", nil)
-                      cleanUp()
-                      return
-                  }
-              }
-              resolve?(callbackURL?.absoluteString ?? "")
-              cleanUp()
-          }
-          session.prefersEphemeralWebBrowserSession = true
-          session.presentationContextProvider = defaultContextProvider
-          sessions += [session]
-          session.start()
+            resolve?(callbackURL?.absoluteString ?? "")
+            cleanUp()
         }
+        session.prefersEphemeralWebBrowserSession = true
+        session.presentationContextProvider = defaultContextProvider
+        sessions += [session]
+        session.start()
     }
 
     @MainActor
@@ -178,6 +155,15 @@ private func prepareInitialRequest(for flowURL: String, with codeChallenge: Stri
 }
 
 private class DefaultContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding {
+    func waitKeyWindow(attempts: Int) async {
+        for _ in 1...attempts {
+            if let window = findKeyWindow() {
+                return
+            }
+            try? await Task.sleep(nanoseconds: 100 * NSEC_PER_MSEC)
+        }
+    }
+
     func findKeyWindow() -> UIWindow? {
         let scene = UIApplication.shared.connectedScenes
             .filter { $0.activationState == .foregroundActive }
@@ -191,7 +177,7 @@ private class DefaultContextProvider: NSObject, ASWebAuthenticationPresentationC
     }
 
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        return ASPresentationAnchor()
+        return findKeyWindow() ?? ASPresentationAnchor()
     }
 }
 
