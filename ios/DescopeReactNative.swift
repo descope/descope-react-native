@@ -4,6 +4,7 @@ import AuthenticationServices
 
 private let redirectScheme = "descopeauth"
 private let redirectURL = "\(redirectScheme)://flow"
+private let maxKeyWindowAttempts = 20
 
 @objc(DescopeReactNative)
 class DescopeReactNative: NSObject {
@@ -62,34 +63,54 @@ class DescopeReactNative: NSObject {
 
     @MainActor
     private func startFlow(_ url: URL) {
-        guard defaultContextProvider.findKeyWindow() != nil else {
+        Task { @MainActor in
+          var completed = false
+          var attempts = 0
+          do {
+            attempts += 1
+            while !completed {
+              // make sure key window is available
+              if let keyWindow = defaultContextProvider.findKeyWindow() {
+                completed = true
+                continue
+              }
+
+              // search for a maximum of 20 attempts * 100ms
+              guard attempts < maxKeyWindowAttempts else { throw DescopeError.flowFailed("Exceeded maximum attempts to find key window") }
+
+              // retry again in 100ms
+              try await Task.sleep(nanoseconds: 100 * NSEC_PER_MSEC)
+            }
+          } catch {
             reject?("flow_failed", "unable to find key window", nil)
             return
+          }
+
+          let session = ASWebAuthenticationSession(url: url, callbackURLScheme: redirectScheme) { [self] callbackURL, error in
+              if let error {
+                  switch error {
+                  case ASWebAuthenticationSessionError.canceledLogin:
+                      reject?("flow_canceled", "Authentication canceled by user", nil)
+                      cleanUp()
+                      return
+                  case ASWebAuthenticationSessionError.presentationContextInvalid,
+                      ASWebAuthenticationSessionError.presentationContextNotProvided:
+                      // not handled for now
+                      fallthrough
+                  default:
+                      reject?("flow_failed", "Flow failed unexpectedly", nil)
+                      cleanUp()
+                      return
+                  }
+              }
+              resolve?(callbackURL?.absoluteString ?? "")
+              cleanUp()
+          }
+          session.prefersEphemeralWebBrowserSession = true
+          session.presentationContextProvider = defaultContextProvider
+          sessions += [session]
+          session.start()
         }
-        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: redirectScheme) { [self] callbackURL, error in
-            if let error {
-                switch error {
-                case ASWebAuthenticationSessionError.canceledLogin:
-                    reject?("flow_canceled", "Authentication canceled by user", nil)
-                    cleanUp()
-                    return
-                case ASWebAuthenticationSessionError.presentationContextInvalid,
-                    ASWebAuthenticationSessionError.presentationContextNotProvided:
-                    // not handled for now
-                    fallthrough
-                default:
-                    reject?("flow_failed", "Flow failed unexpectedly", nil)
-                    cleanUp()
-                    return
-                }
-            }
-            resolve?(callbackURL?.absoluteString ?? "")
-            cleanUp()
-        }
-        session.prefersEphemeralWebBrowserSession = true
-        session.presentationContextProvider = defaultContextProvider
-        sessions += [session]
-        session.start()
     }
 
     @MainActor
