@@ -58,6 +58,8 @@ export interface DescopeSession {
 export interface DescopeSessionManager {
   /** The active [DescopeSession] managed by this object. */
   session?: DescopeSession
+  /** A loading flag, set to true during initial load. Updates to false once loading completes. Only loads once. */
+  isSessionLoading: boolean
   /**
    * Set an active [DescopeSession] in this manager.
    *

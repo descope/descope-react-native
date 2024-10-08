@@ -77,8 +77,8 @@ const res = await fetch('/path/to/server/api', {
 })
 ```
 
-When the application is relaunched the `useSession` will automatically load any existing
-session and you can check straight away if there's an authenticated user.
+When the application is relaunched the `AuthProvider` component will automatically load any existing
+session. Once the `isSessionLoading` flag is `false`, you can check if there's a session available (i.e. an authenticated user).
 
 When the user wants to sign out of the application we revoke the
 active session and clear it from the session manager:
@@ -91,6 +91,75 @@ const { session, clearSession } = useSession()
 
 await descope.logout(session.refreshJwt)
 await clearSession(resp.data)
+```
+
+### Accessing the Session
+
+The session information can be accessed via the `useSession` hook, but also it might be convenient
+to use the `getCurrentSessionToken()`, `getCurrentRefreshToken()` and `getCurrentUser()` helper functions.
+These functions are available outside of the component render-lifecycle.
+This might be useful, for example, to add an authorization header to all authenticated requests.
+
+### Refreshing the Session
+
+The guiding principal of refreshing the session is the same, regardless of any specific
+app architecture or network framework.
+
+Before every authenticated request, add your authorization header to the request the way your server
+expects to receive it. As an optimization it is also possible to call `refreshSessionIfAboutToExpire()`.
+This async function will preemptively refresh the session token if it is about to expire, or already expired.
+That code might look something like this:
+
+```js
+// ... before every authenticated request
+try {
+  // refresh if needed
+  await refreshSessionIfAboutToExpire()
+} catch (e) {
+  // fail silently - as this shouldn't affect the request being performed
+}
+
+// add authorization header
+request.headers.Authorization = `Bearer ${getCurrentSessionToken()}`
+```
+
+After every error response - if the server responds that the session token is invalid, i.e.
+`401` or your equivalent, try to refresh the session token and repeat the request. Otherwise,
+clear the session and prompt the user to re-authenticate.
+That code might look something like this
+
+```js
+// ... on every error response
+// assuming 401 is returned ONLY when the session JWT is invalid
+if (error.status === 401) {
+  try {
+    const resp = await descope.refresh(getCurrentRefreshToken())
+    await updateTokens(resp.data.sessionJwt, resp.data.refreshJwt)
+
+    // you can now retry the original request
+    // NEED TO MAKE SURE THAT THIS RETRY IS ONLY PERFORMED ONCE
+    // otherwise, an endless loop of failed requests might occur
+    retryRequest()
+  } catch (e) {
+    // clear the session as the user must re-authenticate
+  }
+}
+```
+
+**IMPORTANT NOTE**: if you find the need to pass a reference to the `refreshSessionIfAboutToExpire()`
+`updateTokens()` and `descope` from the `useSession` hook into some network component, make sure
+it is done in a lifecycle aware method.
+That code might look something like this:
+
+```js
+const descope = useDescope()
+const { isSessionLoading, refreshSessionIfAboutToExpire, updateTokens } = useSession()
+
+React.useEffect(() => {
+  if (!isSessionLoading) {
+    setUpNetworkRefresh(refreshSessionIfAboutToExpire, updateTokens, descope)
+  }
+}, [isSessionLoading refreshSessionIfAboutToExpire, updateTokens, descope])
 ```
 
 ## Running Flows

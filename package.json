@@ -1,6 +1,6 @@
 {
   "name": "@descope/react-native-sdk",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "The Descope SDK for React-Native",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
