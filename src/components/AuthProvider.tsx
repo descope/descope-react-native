@@ -3,10 +3,12 @@ import { createSdk, type SdkConfig } from '../internal/core/sdk'
 import Context from '../internal/hooks/Context'
 import DescopeReactNative from '../internal/modules/descopeModule'
 import type { DescopeSession } from '../types'
+import { setCurrentTokens, setCurrentUser } from '../helpers'
 
 type Props = Pick<SdkConfig[0], 'projectId' | 'baseUrl' | 'logger' | 'fetch'> & { children?: JSX.Element }
 const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, children }) => {
   const [session, setSession] = useState<DescopeSession>()
+  const [isSessionLoading, setSessionLoading] = useState<boolean>(true)
 
   const sdk = useMemo(() => {
     return createSdk({ projectId, baseUrl, logger, fetch })
@@ -27,6 +29,8 @@ const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, children }
         if (loaded?.length) {
           logger?.log('persisted session found')
           const parsed = JSON.parse(loaded) as DescopeSession
+          setCurrentTokens(parsed.sessionJwt, parsed.refreshJwt)
+          setCurrentUser(parsed.user)
           setSession(parsed)
         } else {
           logger?.log('no persisted session found')
@@ -35,6 +39,9 @@ const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, children }
       })
       .catch((e) => {
         logger?.error('failed to search for persisted session', e)
+      })
+      .finally(() => {
+        setSessionLoading(false)
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId])
@@ -46,8 +53,9 @@ const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, children }
       projectId: projectId,
       session,
       setSession,
+      isSessionLoading,
     }),
-    [sdk, logger, projectId, session, setSession],
+    [sdk, logger, projectId, session, setSession, isSessionLoading],
   )
 
   return <Context.Provider value={context}>{children}</Context.Provider>
