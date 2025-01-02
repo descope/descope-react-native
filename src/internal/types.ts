@@ -7,4 +7,5 @@ export interface DescopeContext {
   projectId: string
   session?: DescopeSession
   setSession: React.Dispatch<React.SetStateAction<DescopeSession | undefined>>
+  isSessionLoading: boolean
 }

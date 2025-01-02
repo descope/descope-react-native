@@ -4,7 +4,7 @@ import { Platform } from 'react-native'
 import type { Sdk } from '../internal/core/sdk'
 import useContext from '../internal/hooks/useContext'
 import DescopeReactNative from '../internal/modules/descopeModule'
-import type { DescopeFlow } from '../types'
+import type { DescopeFlow, FlowAuthentication } from '../types'
 import useDescope from './useDescope'
 
 const useFlow = (): DescopeFlow => {
@@ -19,12 +19,21 @@ const useFlow = (): DescopeFlow => {
   }>()
 
   const start = useCallback(
-    async (flowUrl: string, deepLinkUrl?: string) => {
+    async (flowUrl: string, deepLinkUrl?: string, backupCustomScheme?: string, authentication?: FlowAuthentication) => {
       logger?.log('starting flow')
       setCurrentFlowUrl(flowUrl)
-      const resp = await DescopeReactNative.startFlow(flowUrl, deepLinkUrl || '')
+
+      // Prepare flow URL
+      const resp = await DescopeReactNative.prepFlow()
+
+      // Prime the flow if needed
+      if (authentication) {
+        await primeFlow(sdk, resp.codeChallenge, authentication)
+      }
+
+      const callbackUrl = await DescopeReactNative.startFlow(flowUrl, deepLinkUrl || '', backupCustomScheme || '', resp.codeChallenge)
       if (Platform.OS === 'ios') {
-        return exchangeForJwtResponse(sdk, resp.codeVerifier, resp.callbackUrl)
+        return exchangeForJwtResponse(sdk, resp.codeVerifier, callbackUrl)
       }
 
       // On Android we need to exchange after the redirect has completed
@@ -69,6 +78,10 @@ const useFlow = (): DescopeFlow => {
   )
 
   return { start, resume, exchange }
+}
+
+const primeFlow = async (sdk: Sdk, codeChallenge: string, authentication: FlowAuthentication): Promise<SdkResponse<never>> => {
+  return transformResponse(sdk.httpClient.post('/v1/flow/prime', { flowId: authentication.flowId, codeChallenge }, { token: authentication.refreshJwt }))
 }
 
 const exchangeForJwtResponse = async (sdk: Sdk, codeVerifier: string, callbackUrl: string): Promise<SdkResponse<JWTResponse>> => {

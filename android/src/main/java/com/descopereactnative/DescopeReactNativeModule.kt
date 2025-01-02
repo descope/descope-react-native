@@ -15,10 +15,12 @@ import com.facebook.react.bridge.ReactMethod
 import java.security.MessageDigest
 import kotlin.random.Random
 
+private const val prefName = "com.descope.reactnative"
+
 class DescopeReactNativeModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
 
-  private val storage: EncryptedStorage by lazy { EncryptedStorage(reactContext) }
+  private val storage: EncryptedStorage? by lazy { createEncryptedStore(reactContext) }
 
   override fun getName(): String {
     return NAME
@@ -27,9 +29,7 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
   // Flow
 
   @ReactMethod
-  fun startFlow(flowUrl: String, deepLinkUrl: String, promise: Promise) {
-    if (flowUrl.isEmpty()) return promise.reject("empty_url", "'flowUrl' is required when calling startFlow")
-
+  fun prepFlow(promise: Promise) {
     // create some random bytes
     val randomBytes = ByteArray(32)
     Random.nextBytes(randomBytes)
@@ -44,18 +44,29 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
     // codeChallenge == base64(sha256(randomBytes))
     val codeChallenge = String(Base64.encode(hashed, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
 
+    // resolve the promise with the code verifier and challenge
+    promise.resolve(Arguments.makeNativeMap(mapOf("codeVerifier" to codeVerifier, "codeChallenge" to codeChallenge)))
+  }
+
+  @ReactMethod
+  fun startFlow(flowUrl: String, deepLinkUrl: String, backupCustomScheme: String, codeChallenge: String, promise: Promise) {
+    if (flowUrl.isEmpty()) return promise.reject("empty_url", "'flowUrl' is required when calling startFlow")
+
     // embed into url parameters
-    val uri = Uri.parse(flowUrl).buildUpon()
+    val uriBuilder = Uri.parse(flowUrl).buildUpon()
       .appendQueryParameter("ra-callback", deepLinkUrl)
       .appendQueryParameter("ra-challenge", codeChallenge)
       .appendQueryParameter("ra-initiator", "android")
-      .build()
+    if (backupCustomScheme.isNotEmpty()) {
+        uriBuilder.appendQueryParameter("ra-backup-callback", backupCustomScheme)
+    }
+    val uri = uriBuilder.build()
 
     // launch via chrome custom tabs
     launchUri(reactContext, uri)
 
-    // resolve the promise with the code verifier
-    promise.resolve(Arguments.makeNativeMap(mapOf("codeVerifier" to codeVerifier)))
+    // resolve the promise
+    promise.resolve("")
   }
 
   @ReactMethod
@@ -68,25 +79,26 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
 
     // launch via chrome custom tabs
     launchUri(reactContext, uri)
+    promise.resolve(flowUrl)
   }
 
   // Storage
 
   @ReactMethod
   fun loadItem(key: String, promise: Promise) {
-    val value = storage.loadItem(key)
+    val value = storage?.loadItem(key)
     promise.resolve(value)
   }
 
   @ReactMethod
   fun saveItem(key: String, value: String, promise: Promise) {
-    storage.saveItem(key, value)
+    storage?.saveItem(key, value)
     promise.resolve(key)
   }
 
   @ReactMethod
   fun removeItem(key: String, promise: Promise) {
-    storage.removeItem(key)
+    storage?.removeItem(key)
     promise.resolve(key)
   }
 
@@ -108,7 +120,7 @@ private fun launchUri(context: Context, uri: Uri) {
 private class EncryptedStorage(context: Context) {
   private val masterKey = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
   private val sharedPreferences = EncryptedSharedPreferences.create(
-    "com.descope.reactnative",
+    prefName,
     masterKey,
     context,
     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
@@ -124,4 +136,20 @@ private class EncryptedStorage(context: Context) {
   fun removeItem(key: String) = sharedPreferences.edit()
     .remove(key)
     .apply()
+}
+
+private fun createEncryptedStore(context: Context): EncryptedStorage? {
+    return try {
+        EncryptedStorage(context)
+    } catch (e: Exception) {
+        try {
+            // encrypted storage key unusable - deleting and recreating
+            // see google issue https://issuetracker.google.com/issues/164901843
+            context.deleteSharedPreferences(prefName)
+            EncryptedStorage(context)
+        } catch (e: Exception) {
+            // unable to initialize encrypted storage
+            null
+        }
+    }
 }

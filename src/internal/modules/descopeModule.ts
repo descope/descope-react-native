@@ -1,13 +1,14 @@
 import { NativeModules } from 'react-native'
 
-type StartFlowResponse = {
+type PrepFlowResponse = {
+  codeChallenge: string
   codeVerifier: string
-  callbackUrl: string
 }
 
 const { DescopeReactNative } = NativeModules
 interface DescopeNative {
-  startFlow(flowUrl: string, deepLinkUrl: string): Promise<StartFlowResponse>
+  prepFlow(): Promise<PrepFlowResponse>
+  startFlow(flowUrl: string, deepLinkUrl: string, backupCustomScheme: string, codeChallenge: string): Promise<string>
   resumeFlow(flowUrl: string, incomingUrl: string): Promise<void>
   loadItem(key: string): Promise<string>
   saveItem(key: string, value: string): Promise<string>
