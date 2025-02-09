@@ -9,7 +9,7 @@
     "pods": "pod-install --quiet"
   },
   "dependencies": {
-    "react": "18.2.0",
+    "react": "18.3.1",
     "react-native": "0.77.0"
   },
   "devDependencies": {
@@ -21,8 +21,8 @@
     "@react-native-community/cli-platform-ios": "15.0.1",
     "@react-native/eslint-config": "^0.77.0",
     "@react-native/metro-config": "^0.77.0",
-    "metro-react-native-babel-preset": "0.77.0",
-    "babel-plugin-module-resolver": "^5.0.0"
+    "babel-plugin-module-resolver": "^5.0.0",
+    "metro-react-native-babel-preset": "^0.77.0"
   },
   "engines": {
     "node": ">=18.18.0"

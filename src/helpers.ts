@@ -2,7 +2,7 @@ import type { UserResponse } from '@descope/core-js-sdk'
 
 let currentSessionToken = ''
 let currentRefreshToken = ''
-let currentUser: UserResponse | undefined = undefined
+let currentUser: UserResponse | undefined
 
 // internal setters
 
