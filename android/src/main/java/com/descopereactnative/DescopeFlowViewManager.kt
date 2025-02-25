@@ -61,6 +61,11 @@ class DescopeFlowViewManager(context: ReactApplicationContext) : SimpleViewManag
     descopeFlowView.run(descopeFlow)
   }
 
+  @ReactProp(name = "deepLink")
+  fun setDeepLink(descopeFlowView: DescopeFlowView, deepLink: String?) {
+    descopeFlowView.resumeFromDeepLink(deepLink)
+  }
+
   // Flow Listener
 
   override fun onReady(context: Context, id: Int) {

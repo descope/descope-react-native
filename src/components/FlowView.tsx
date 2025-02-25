@@ -12,7 +12,7 @@ type DescopeFlowView = {
 
 const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostComponent<DescopeFlowView>
 
-export default function FlowView(props: { flowOptions: FlowOptions; style?: ViewStyle; onReady?: () => unknown; onSuccess?: (jwtResponse: JWTResponse) => {}; onError?: (error: string) => {} }) {
+export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: string; style?: ViewStyle; onReady?: () => unknown; onSuccess?: (jwtResponse: JWTResponse) => {}; onError?: (error: string) => {} }) {
   const onReadyCb = useCallback(() => {
     props.onReady?.()
   }, [props.onReady])

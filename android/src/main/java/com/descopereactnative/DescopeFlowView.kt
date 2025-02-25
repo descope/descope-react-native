@@ -80,11 +80,12 @@ class DescopeFlow(val uri: Uri) {
 //  }
 }
 
-class DescopeFlowView(context: Context)  : ViewGroup(context), DescopeFlowCoordinator.Listener {
+class DescopeFlowView(context: Context) : ViewGroup(context), DescopeFlowCoordinator.Listener {
 
   internal lateinit var listener: Listener
 
   private lateinit var flowCoordinator: DescopeFlowCoordinator
+  private var deepLink: String? = null
 
   init {
     initView()
@@ -109,6 +110,13 @@ class DescopeFlowView(context: Context)  : ViewGroup(context), DescopeFlowCoordi
 
   fun run(flow: DescopeFlow) {
     flowCoordinator.run(flow)
+  }
+
+  fun resumeFromDeepLink(deepLink: String?) {
+    if (deepLink?.isNotEmpty() == true && this.deepLink != deepLink) {
+      this.deepLink = deepLink
+      flowCoordinator.resumeFromDeepLink(Uri.parse(deepLink))
+    }
   }
 
   // Listener

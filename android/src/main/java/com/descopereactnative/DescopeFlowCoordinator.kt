@@ -204,13 +204,13 @@ internal class DescopeFlowCoordinator(private val webView: WebView, private val 
     webView.loadUrl(flow.uri.toString())
   }
 
-    internal fun resumeFromDeepLink(deepLink: Uri) {
-        if (!this::flow.isInitialized) throw Exception("`resumeFromDeepLink` cannot be called before `startFlow`")
-        activityHelper.closeCustomTab(webView.context)
-        val response = JSONObject().apply { put("url", deepLink.toString()) }
-        val type = if (deepLink.queryParameterNames.contains("t")) "magicLink" else "oauthWeb"
-        webView.evaluateJavascript("document.getElementsByTagName('descope-wc')[0]?.nativeResume('$type', `${response.toString().escapeForBackticks()}`)") {}
-    }
+  internal fun resumeFromDeepLink(deepLink: Uri) {
+      if (!this::flow.isInitialized) throw Exception("`resumeFromDeepLink` cannot be called before `startFlow`")
+      activityHelper.closeCustomTab(webView.context)
+      val response = JSONObject().apply { put("url", deepLink.toString()) }
+      val type = if (deepLink.queryParameterNames.contains("t")) "magicLink" else "oauthWeb"
+      webView.evaluateJavascript("document.getElementsByTagName('descope-wc')[0]?.nativeResume('$type', `${response.toString().escapeForBackticks()}`)") {}
+  }
 
   // Listener
 
