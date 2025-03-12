@@ -178,11 +178,11 @@ export type FlowOptions = {
   /** The URL where the flow is hosted */
   url: string
   /**
-   * The ID of the oauth provider that is configured to correctly "Sign In with Google".
-   * Will likely be "google" if the Descope "Google" provider was customized,
-   * or alternatively a custom provider ID.
+   * The ID of the oauth provider that is configured to natively "Sign In with Google"
+   * or "Sign In with Apple". Will likely be "google" or "apple" (according to platform) if the
+   * Descope "Google" or "Apple" provider were customized, or alternatively a custom provider ID.
    */
-  oauthProvider?: string
+  oauthNativeProvider?: string
   /**
    * An optional deep link link URL to use when performing OAuth authentication, overriding
    * whatever is configured in the flow or project.

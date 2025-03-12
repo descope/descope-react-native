@@ -5,9 +5,9 @@ import type { JWTResponse } from '@descope/core-js-sdk'
 
 // TODO: Document this
 type DescopeFlowView = {
-  onReady: (event: any) => unknown
-  onSuccess: (event: any) => unknown
-  onError: (event: any) => unknown
+  onFlowReady: (event: any) => unknown
+  onFlowSuccess: (event: any) => unknown
+  onFlowError: (event: any) => unknown
 }
 
 const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostComponent<DescopeFlowView>
@@ -19,16 +19,10 @@ export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: s
 
   const onSuccessHook = useCallback(
     (event: any) => {
-      const cookieSessionJwts = event.nativeEvent.cookieSessionJwts as string[]
-      const cookieRefreshJwts = event.nativeEvent.cookieRefreshJwts as string[]
-      const jwtResponse = JSON.parse(event.nativeEvent.response) as JWTResponse
-      // TODO: might want to parse the jwts to enforce project ID and support more than one jwt in the future
-      if (!jwtResponse.sessionJwt && cookieSessionJwts.length > 0) {
-        jwtResponse.sessionJwt = cookieSessionJwts[0]!
-      }
-      if (!jwtResponse.refreshJwt && cookieRefreshJwts.length > 0) {
-        jwtResponse.refreshJwt = cookieRefreshJwts[0]
-      }
+      const rawResponse = JSON.parse(event.nativeEvent.response)
+      const jwtResponse = rawResponse as JWTResponse
+      jwtResponse.sessionJwt = jwtResponse.sessionJwt ?? rawResponse.sessionToken
+      jwtResponse.refreshJwt = jwtResponse.refreshJwt ?? rawResponse.refreshToken
       props.onSuccess?.(jwtResponse)
     },
     [props.onSuccess],
@@ -40,5 +34,5 @@ export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: s
     },
     [props.onError],
   )
-  return <DescopeFlowView {...props} onReady={onReadyCb} onSuccess={onSuccessHook} onError={onErrorCb} />
+  return <DescopeFlowView {...props} onFlowReady={onReadyCb} onFlowSuccess={onSuccessHook} onFlowError={onErrorCb} />
 }

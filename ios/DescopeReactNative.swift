@@ -133,31 +133,24 @@ private extension Data {
         guard SecRandomCopyBytes(kSecRandomDefault, count, &bytes) == errSecSuccess else { return nil }
         self = Data(bytes: bytes, count: count)
     }
-
-    func base64URLEncodedString(options: Data.Base64EncodingOptions = []) -> String {
-        return base64EncodedString(options: options)
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
-    }
 }
 
 private func prepareInitialRequest(for flowURL: String, with codeChallenge: String) throws -> URL {
-    guard let url = URL(string: flowURL) else { throw DescopeError.flowFailed("Invalid flow URL") }
-    guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { throw DescopeError.flowFailed("Malformed flow URL") }
+    guard let url = URL(string: flowURL) else { throw DescopeError.flowFailed.with(message: "Invalid flow URL") }
+    guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { throw DescopeError.flowFailed.with(message: "Malformed flow URL") }
     components.queryItems = components.queryItems ?? []
     components.queryItems?.append(URLQueryItem(name: "ra-callback", value: redirectURL))
     components.queryItems?.append(URLQueryItem(name: "ra-challenge", value: codeChallenge))
     components.queryItems?.append(URLQueryItem(name: "ra-initiator", value: "ios"))
 
-    guard let initialURL = components.url else { throw DescopeError.flowFailed("Failed to create flow URL") }
+    guard let initialURL = components.url else { throw DescopeError.flowFailed.with(message: "Failed to create flow URL") }
     return initialURL
 }
 
 private class DefaultContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding {
     func waitKeyWindow(attempts: Int) async {
         for _ in 1...attempts {
-            if let window = findKeyWindow() {
+            if findKeyWindow() != nil {
                 return
             }
             try? await Task.sleep(nanoseconds: 100 * NSEC_PER_MSEC)
@@ -179,10 +172,6 @@ private class DefaultContextProvider: NSObject, ASWebAuthenticationPresentationC
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         return findKeyWindow() ?? ASPresentationAnchor()
     }
-}
-
-enum DescopeError: Error {
-    case flowFailed(String)
 }
 
 private class KeychainStore {
