@@ -12,7 +12,7 @@ class DescopeReactNativePackage : ReactPackage {
   }
 
   override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
-    return listOf(DescopeFlowViewManager(reactContext))
+    return listOf(DescopeFlowViewManager())
   }
 
 }
