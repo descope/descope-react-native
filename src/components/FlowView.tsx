@@ -69,9 +69,10 @@ const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostCompone
  * @returns The Descope FlowView component
  */
 export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: string; style?: ViewStyle; onReady?: () => unknown; onSuccess?: (jwtResponse: JWTResponse) => unknown; onError?: (error: string) => unknown }) {
+  const { onReady, onSuccess, onError } = props
   const onReadyCb = useCallback(() => {
-    props.onReady?.()
-  }, [props.onReady])
+    onReady?.()
+  }, [onReady])
 
   const onSuccessHook = useCallback(
     (event: any) => {
@@ -79,16 +80,16 @@ export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: s
       const jwtResponse = rawResponse as JWTResponse
       jwtResponse.sessionJwt = jwtResponse.sessionJwt ?? rawResponse.sessionToken
       jwtResponse.refreshJwt = jwtResponse.refreshJwt ?? rawResponse.refreshToken
-      props.onSuccess?.(jwtResponse)
+      onSuccess?.(jwtResponse)
     },
-    [props.onSuccess],
+    [onSuccess],
   )
 
   const onErrorCb = useCallback(
     (event: any) => {
-      props.onError?.(event.nativeEvent.error)
+      onError?.(event.nativeEvent.error)
     },
-    [props.onError],
+    [onError],
   )
   return <DescopeFlowView {...props} onFlowReady={onReadyCb} onFlowSuccess={onSuccessHook} onFlowError={onErrorCb} />
 }
