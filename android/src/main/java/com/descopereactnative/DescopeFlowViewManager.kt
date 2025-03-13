@@ -100,7 +100,7 @@ class DescopeFlowViewManager() : SimpleViewManager<DescopeFlowView>(), DescopeFl
   override fun onError(exception: DescopeException) {
     descopeFlowView?.run {
       dispatch(context, id) { surfaceId ->
-        ErrorEvent(surfaceId, id, exception.toString())
+        ErrorEvent(surfaceId, id, exception)
       }
     }
   }
@@ -139,11 +139,13 @@ class SuccessEvent(
 class ErrorEvent(
   surfaceId: Int,
   viewId: Int,
-  private val error: String,
+  private val exception: DescopeException,
 ) : Event<ErrorEvent>(surfaceId, viewId) {
   override fun getEventName() = "onFlowError"
   override fun getEventData(): WritableMap? = Arguments.createMap().apply {
-    putString("error", error)
+    putString("errorCode", exception.code)
+    putString("errorDescription", exception.desc)
+    putString("errorMessage", exception.message)
   }
 }
 

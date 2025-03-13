@@ -63,7 +63,11 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
     }
     
     func flowViewDidFail(_ flowView: DescopeFlowView, error: DescopeError) {
-        onFlowError?(["error": error.localizedDescription])
+        onFlowError?([
+            "errorCode": error.code,
+            "errorDescription": error.localizedDescription,
+            "errorMessage": error.message
+        ])
     }
     
     func flowViewDidFinish(_ flowView: DescopeFlowView, response: AuthenticationResponse) {

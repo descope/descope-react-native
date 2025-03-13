@@ -8,4 +8,4 @@ export { default as useFlow } from './hooks/useFlow'
 
 export { getCurrentSessionToken, getCurrentRefreshToken, getCurrentUser } from './helpers'
 
-export type { DescopeSession, DescopeSessionManager, DescopeFlow, FlowOptions, AndroidFlowOptions, iOSFlowOptions } from './types'
+export type { DescopeSession, DescopeSessionManager, DescopeFlow, FlowOptions, AndroidFlowOptions, iOSFlowOptions, DescopeError } from './types'

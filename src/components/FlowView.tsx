@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { requireNativeComponent, type HostComponent, type ViewStyle } from 'react-native'
-import type { FlowOptions } from '../types'
+import type { DescopeError, FlowOptions } from '../types'
 import type { JWTResponse } from '@descope/core-js-sdk'
 
 type DescopeFlowView = {
@@ -68,7 +68,7 @@ const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostCompone
  * a set of callbacks when the Flow is `ready` to be presented, and finished in a `success` or `error` state.
  * @returns The Descope FlowView component
  */
-export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: string; style?: ViewStyle; onReady?: () => unknown; onSuccess?: (jwtResponse: JWTResponse) => unknown; onError?: (error: string) => unknown }) {
+export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: string; style?: ViewStyle; onReady?: () => unknown; onSuccess?: (jwtResponse: JWTResponse) => unknown; onError?: (error: DescopeError) => unknown }) {
   const { onReady, onSuccess, onError } = props
   const onReadyCb = useCallback(() => {
     onReady?.()
@@ -87,7 +87,12 @@ export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: s
 
   const onErrorCb = useCallback(
     (event: any) => {
-      onError?.(event.nativeEvent.error)
+      const error = {
+        errorCode: event.nativeEvent.errorCode,
+        errorDescription: event.nativeEvent.errorDescription,
+        errorMessage: event.nativeEvent.errorMessage,
+      }
+      onError?.(error)
     },
     [onError],
   )

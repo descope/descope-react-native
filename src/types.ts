@@ -114,55 +114,11 @@ export interface DescopeSessionManager {
   updateUser(userResponse: UserResponse): Promise<void>
 }
 
-/**
- * Authenticate a user using a flow.
- *
- * Descope Flows is a visual no-code interface to build screens and authentication flows
- * for common user interactions with your application. Flows are hosted on a webpage and
- * are run using a sandboxed browser view.
- *
- * Under the hood, this authentication function uses platform specific classes to
- * display the flows: `ASWebAuthenticationSession` on iOS and `Custom Tabs` on Android.
- * If targeting Android you need to set up `Android App Links` in order to communicate back
- * to the application. Read more about it in the README under the `Running Flows` section.
- */
-export interface DescopeFlow {
-  /**
-   * Starts a user authentication flow.
-   *
-   * If the user has an **active session** and this function was provided with `FlowAuthentication`,
-   * this flow will run with the user logged in.
-   *
-   * For Android only, you can provide a backup custom scheme. The custom scheme will be used
-   * only for users whose default browser doesn't open App Links automatically, such as Opera.
-   *
-   * The flow screens are presented in a sandboxed browser view that's displayed by this
-   * function call. The function then waits until the authentication completed successfully,
-   * at which point it will return an [JwtResponse] as in all other
-   * authentication functions. Provide this call with a [flowUrl] where the flow
-   * is hosted, and optionally a [deepLinkUrl] if targeting Android. This is the URL
-   * that needs to be called by Descope in order to return a result from the flow.
-   * This result URI should then be processed by the [exchange] function.
-   */
-  start(flowUrl: string, deepLinkUrl: string, backupCustomScheme?: string, authentication?: FlowAuthentication): Promise<SdkResponse<JWTResponse>>
-  /**
-   * Resumes an ongoing flow after a redirect back to the app with an [incomingUri].
-   * This is required for *Magic Link only* at this stage.
-   *
-   * **Note:** This requires additional setup on the application side.
-   * See the README for more details.
-   */
-  resume(incomingUrl: string): Promise<void>
-  /**
-   * Exchange a URL for an [JwtResponse].
-   *
-   * This function should be called only when targeting Android.
-   * When a flow completes successfully, the result will be sent through
-   * the configured deep link URL. However, it must still be exchanged for an
-   * actual [JwtResponse] to complete the authentication flow.
-   * The [JwtResponse] will be returned to the original call to [start].
-   */
-  exchange(incomingUrl: string): Promise<void>
+/** An error that can return from various SDK operation */
+export type DescopeError = {
+  errorCode: string
+  errorDescription: string
+  errorMessage?: string
 }
 
 /** Provide authentication info if the flow is being run by a user that's already authenticated. */
@@ -245,4 +201,59 @@ export type iOSFlowOptions = {
    * overriding whatever is configured in the flow or project
    */
   magicLinkRedirect?: string
+}
+
+// Deprecated
+
+/**
+ * @deprecated Use `FlowView` instead.
+ *
+ * Authenticate a user using a flow.
+ *
+ * Descope Flows is a visual no-code interface to build screens and authentication flows
+ * for common user interactions with your application. Flows are hosted on a webpage and
+ * are run using a sandboxed browser view.
+ *
+ * Under the hood, this authentication function uses platform specific classes to
+ * display the flows: `ASWebAuthenticationSession` on iOS and `Custom Tabs` on Android.
+ * If targeting Android you need to set up `Android App Links` in order to communicate back
+ * to the application. Read more about it in the README under the `Running Flows` section.
+ */
+export interface DescopeFlow {
+  /**
+   * Starts a user authentication flow.
+   *
+   * If the user has an **active session** and this function was provided with `FlowAuthentication`,
+   * this flow will run with the user logged in.
+   *
+   * For Android only, you can provide a backup custom scheme. The custom scheme will be used
+   * only for users whose default browser doesn't open App Links automatically, such as Opera.
+   *
+   * The flow screens are presented in a sandboxed browser view that's displayed by this
+   * function call. The function then waits until the authentication completed successfully,
+   * at which point it will return an [JwtResponse] as in all other
+   * authentication functions. Provide this call with a [flowUrl] where the flow
+   * is hosted, and optionally a [deepLinkUrl] if targeting Android. This is the URL
+   * that needs to be called by Descope in order to return a result from the flow.
+   * This result URI should then be processed by the [exchange] function.
+   */
+  start(flowUrl: string, deepLinkUrl: string, backupCustomScheme?: string, authentication?: FlowAuthentication): Promise<SdkResponse<JWTResponse>>
+  /**
+   * Resumes an ongoing flow after a redirect back to the app with an [incomingUri].
+   * This is required for *Magic Link only* at this stage.
+   *
+   * **Note:** This requires additional setup on the application side.
+   * See the README for more details.
+   */
+  resume(incomingUrl: string): Promise<void>
+  /**
+   * Exchange a URL for an [JwtResponse].
+   *
+   * This function should be called only when targeting Android.
+   * When a flow completes successfully, the result will be sent through
+   * the configured deep link URL. However, it must still be exchanged for an
+   * actual [JwtResponse] to complete the authentication flow.
+   * The [JwtResponse] will be returned to the original call to [start].
+   */
+  exchange(incomingUrl: string): Promise<void>
 }
