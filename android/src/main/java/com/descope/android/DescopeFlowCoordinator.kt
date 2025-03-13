@@ -57,12 +57,10 @@ class DescopeFlowCoordinator(val webView: WebView) {
     internal var listener: DescopeFlowView.Listener? = null
     internal var state: DescopeFlowView.State = Initial
 
-    private lateinit var flow: DescopeFlow
+    private var flow: DescopeFlow? = null
     private val handler: Handler = Handler(Looper.getMainLooper())
-    private val globalSdk: DescopeSdk?
-        get() = if (Descope.isInitialized) Descope.sdk else null
     private val sdk: DescopeSdk?
-        get() = if (this::flow.isInitialized) flow.sdk ?: globalSdk else globalSdk
+        get() = flow?.sdk ?: if (Descope.isInitialized) Descope.sdk else null
     private val logger: DescopeLogger?
         get() = sdk?.client?.config?.logger
     private var currentFlowUrl: Uri? = null
@@ -97,12 +95,11 @@ class DescopeFlowCoordinator(val webView: WebView) {
                 val jwtServerResponse = JwtServerResponse.fromJson(success, emptyList())
                 // take tokens from cookies if missing
                 val cookieString = CookieManager.getInstance().getCookie(url)
-                val projectId = sdk?.client?.config?.projectId
-                jwtServerResponse.sessionJwt = jwtServerResponse.sessionJwt ?: findJwtInCookies(cookieString, projectId = projectId, name = SESSION_COOKIE_NAME)
-                jwtServerResponse.refreshJwt = jwtServerResponse.refreshJwt ?: findJwtInCookies(cookieString, projectId = projectId, name = REFRESH_COOKIE_NAME)
+                jwtServerResponse.sessionJwt = jwtServerResponse.sessionJwt ?: findJwtInCookies(cookieString, name = SESSION_COOKIE_NAME)
+                jwtServerResponse.refreshJwt = jwtServerResponse.refreshJwt ?: findJwtInCookies(cookieString, name = REFRESH_COOKIE_NAME)
                 handler.post {
                     try {
-                        val authResponse = jwtServerResponse.convert()
+                        val authResponse = jwtServerResponse.convert() 
                         listener?.onSuccess(authResponse)
                     } catch (e: DescopeException) {
                         logger?.log(Error, "Failed to parse authentication response", e)
@@ -155,13 +152,13 @@ class DescopeFlowCoordinator(val webView: WebView) {
 
                             is NativePayload.OAuthWeb -> {
                                 logger?.log(Info, "Launching custom tab for web-based oauth")
-                                launchCustomTab(webView.context, nativePayload.startUrl, flow.presentation?.createCustomTabsIntent(webView.context))
+                                launchCustomTab(webView.context, nativePayload.startUrl, flow?.presentation?.createCustomTabsIntent(webView.context))
                                 return@launch
                             }
 
                             is NativePayload.Sso -> {
                                 logger?.log(Info, "Launching custom tab for sso")
-                                launchCustomTab(webView.context, nativePayload.startUrl, flow.presentation?.createCustomTabsIntent(webView.context))
+                                launchCustomTab(webView.context, nativePayload.startUrl, flow?.presentation?.createCustomTabsIntent(webView.context))
                                 return@launch
                             }
 
@@ -231,9 +228,9 @@ class DescopeFlowCoordinator(val webView: WebView) {
                 return when (listener?.onNavigation(uri) ?: OpenBrowser) {
                     Inline -> false
                     DoNothing -> true
-                    OpenBrowser -> {
+                    OpenBrowser -> { 
                         try {
-                            launchCustomTab(webView.context, uri, flow.presentation?.createCustomTabsIntent(webView.context))
+                            launchCustomTab(webView.context, uri, flow?.presentation?.createCustomTabsIntent(webView.context))
                         } catch (e: DescopeException) {
                             logger?.log(Error, "Failed to open URL in browser", e)
                         }
@@ -261,10 +258,10 @@ class DescopeFlowCoordinator(val webView: WebView) {
                     evaluateJavascript(
                         setupScript(
                             origin = origin,
-                            oauthNativeProvider = flow.oauthNativeProvider?.name ?: "",
-                            oauthRedirect = pickRedirectUrl(flow.oauthRedirect, flow.oauthRedirectCustomScheme, useCustomSchemeFallback),
-                            ssoRedirect = pickRedirectUrl(flow.ssoRedirect, flow.ssoRedirectCustomScheme, useCustomSchemeFallback),
-                            magicLinkRedirect = flow.magicLinkRedirect ?: "",
+                            oauthNativeProvider = flow?.oauthNativeProvider?.name ?: "",
+                            oauthRedirect = pickRedirectUrl(flow?.oauthRedirect, flow?.oauthRedirectCustomScheme, useCustomSchemeFallback),
+                            ssoRedirect = pickRedirectUrl(flow?.ssoRedirect, flow?.ssoRedirectCustomScheme, useCustomSchemeFallback),
+                            magicLinkRedirect = flow?.magicLinkRedirect ?: "",
                             isWebAuthnSupported = isWebAuthnSupported,
                         )
                     ) {}
@@ -334,7 +331,10 @@ document.head.appendChild(element)
     }
 
     internal fun resumeFromDeepLink(deepLink: Uri) {
-        if (!this::flow.isInitialized) throw DescopeException.flowFailed.with(desc = "`resumeFromDeepLink` cannot be called before `startFlow`")
+        if (flow == null) {
+            logger?.log(Error, "resumeFromDeepLink cannot be called before startFlow")
+            return
+        }
         activityHelper.closeCustomTab(webView.context)
         val response = JSONObject().apply { put("url", deepLink.toString()) }
         val type = if (deepLink.queryParameterNames.contains("t")) "magicLink" else "oauthWeb"
@@ -346,7 +346,7 @@ document.head.appendChild(element)
     private fun executeHooks(event: Event) {
         val hooks = mutableListOf<DescopeFlowHook>().apply {
             addAll(DescopeFlowHook.defaults)
-            if (this@DescopeFlowCoordinator::flow.isInitialized) addAll(flow.hooks)
+            addAll(flow?.hooks ?: emptyList())
         }
         hooks.filter { it.events.contains(event) }
             .forEach { it.execute(event, this) }
@@ -501,8 +501,8 @@ private fun String.escapeForBackticks() = replace("\\", "\\\\")
 
 // Cookies
 
-internal fun findJwtInCookies(cookieString: String?, projectId: String?, name: String): String? {
-    // split and aggregate all cookies
+internal fun findJwtInCookies(cookieString: String?, name: String): String? {
+    // split and aggregate all cookies 
     val cookies = mutableListOf<HttpCookie>().apply {
         cookieString?.split("; ")?.forEach {
             try {
@@ -512,7 +512,7 @@ internal fun findJwtInCookies(cookieString: String?, projectId: String?, name: S
         }
     }
 
-    var filtered = cookies.filter { it.name == name } // filter according cookie name
+    return cookies.filter { it.name == name } // filter according cookie name
         .mapNotNull { httpCookie -> // parse token
             try {
                 Token(httpCookie.value)
@@ -520,10 +520,7 @@ internal fun findJwtInCookies(cookieString: String?, projectId: String?, name: S
                 null
             }
         }
-    projectId?.let { pId ->
-        filtered = filtered.filter { it.projectId == projectId } // enforce projectId
-    }
-    return filtered.maxByOrNull { it.issuedAt }?.jwt // take latest
+        .maxByOrNull { it.issuedAt }?.jwt // take latest
 }
 
 // URI

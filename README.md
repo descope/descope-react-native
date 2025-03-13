@@ -179,41 +179,46 @@ the [getting started](https://docs.descope.com/build/guides/gettingstarted/) gui
 You can host the flow yourself or leverage Descope's hosted flow page. Read more about it [here](https://docs.descope.com/customize/auth/oidc/#hosted-flow-application).
 You can also check out the [auth-hosting repo itself](https://github.com/descope/auth-hosting).
 
-### (Android Only) Setup #2: Enable App Links
+### (OPTIONAL) Setup #2.1: Enable App Links for Magic Link and OAuth (social) on Android
 
-Running a flow via the React Native SDK, when targeting Android, requires setting up [App Links](https://developer.android.com/training/app-links#android-app-links).
-This is essential for the SDK to be notified when the user has successfully
-authenticated using a flow. Once you have a domain set up and
-[verified](https://developer.android.com/training/app-links/verify-android-applinks)
-for sending App Links, you'll need to handle the incoming deep links in your app:
+Some authentication methods rely on leaving the application's context to authenticate the
+user, such as navigating to an identity provider's website to perform OAuth (social) authentication,
+or receiving a Magic Link via email or text message. If you do not intend to use these authentication
+methods, you can skip this step. Otherwise, in order for the user to get back
+to your application, setting up [App Links](https://developer.android.com/training/app-links#android-app-links) is required.
+Once you have a domain set up and [verified](https://developer.android.com/training/app-links/verify-android-applinks) for sending App Links,
+you'll need to handle the incoming deep links in your app, and resume the flow.
 
-#### Define a route to handle the App Link sent at the end of a flow
+### (OPTIONAL) Setup #2.2: Support Magic Link Redirects on iOS
+
+Supporting Magic Link authentication in flows requires some platform specific setup:
+You'll need to [support associated domains](https://developer.apple.com/documentation/xcode/supporting-associated-domains?language=swift).
+
+Regardless of the platform, another path is required to handle magic link redirects specifically. For the sake of this README, let's name
+it `/magiclink`
+
+#### Define deep link handling
 
 _this code example demonstrates how app links should be handled - you can customize it to fit your app_
 
 ```js
-import { useFlow } from '@descope/react-native-sdk'
+import { FlowView } from '@descope/react-native-sdk'
 
-const flow = useFlow()
+const [deepLink, setDeepLink] = useState('')
 
 useEffect(() => {
   Linking.addEventListener('url', async (event) => {
-    if (event.url === 'my-deep-link-for-authenticating') {
-      // This path needs to correspond to the deep link you configured in your manifest - see below
-      try {
-        await flow.exchange(event.url) // Call exchange to complete the flow
-      } catch (e) {
-        // Handle errors here
-      }
+    if (event.url === 'https://my-deep-link-for-authenticating.com') {
+      setDeepLink(event.url)
     }
   })
   return () => {
     Linking.removeAllListeners('url')
   }
-}, [flow])
+})
 ```
 
-#### Add a matching Manifest declaration
+#### Add a matching Manifest declaration (Android)
 
 ```xml
 <activity
@@ -250,81 +255,48 @@ useEffect(() => {
 </activity>
 ```
 
-### (OPTIONAL) Setup #3: Support Magic Link Redirects
-
-Supporting Magic Link authentication in flows requires some platform specific setup:
-
-- On Android: add another path entry to the [App Links](https://developer.android.com/training/app-links#android-app-links).
-  This is essentially another path in the same as the app link from the [previous setup step](#setup-2-enable-app-links),
-  with different handling logic. Refer to the previous section for the manifest setup.
-- On iOS: You'll need to [support associated domains](https://developer.apple.com/documentation/xcode/supporting-associated-domains?language=swift).
-
-Regardless of the platform, another path is required to handle magic link redirects specifically. For the sake of this README, let's name
-it `/magiclink`
-
-#### Add the required Linking logic
-
-_this code example demonstrates how app links or universal links should be handled - you can customize it to fit your app_
-
-```js
-import { useFlow } from '@descope/react-native-sdk'
-
-const flow = useFlow()
-
-useEffect(() => {
-  Linking.addEventListener('url', async (event) => {
-    if (event.url === 'my-deep-link-for-authenticating') {
-      try {
-        await flow.exchange(event.url) // Call exchange to complete the flow
-      } catch (e) {
-        // Handle errors here
-      }
-    } else if (event.url === 'my-deep-link-for-magic-links') {
-      // Adding the magic link handling here
-      try {
-        await flow.resume(event.url) // Resume the flow after returning from a magic link
-      } catch (e) {
-        // Handle errors here
-      }
-    }
-  })
-  return () => {
-    Linking.removeAllListeners('url')
-  }
-}, [flow])
-```
-
 ### Run a Flow
 
 After completing the prerequisite steps, it is now possible to run a flow.
-The flow will run in a [Custom Tab](https://developer.chrome.com/docs/android/custom-tabs/) on Android,
-or via [ASWebAuthenticationSession](https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession) on iOS.
-Run the flow by calling the flow start function:
+The flow will run in a dedicated `FlowView` component which receives `FlowOptions`.
+The `FlowOptions` defines all of the options available when running a flow on both
+Android and iOS. Read the component documentation for a detailed explanation.
 
 ```js
-import { useFlow } from '@descope/react-native-sdk'
+import { FlowView } from '@descope/react-native-sdk'
 
-const flow = useFlow()
-const { session, manageSession } = useSession()
+const { manageSession } = useSession()
 
-try {
-  // When starting a flow for an authenticated user, provide the authentication info
-  let flowAuthentication
-  if (session) {
-    flowAuthentication = {
-      flowId: 'flow-id',
-      refreshJwt: session.refreshJwt,
+const flowUrl = 'https://myflowUrl.com'
+
+<FlowView
+  style={styles.fill}
+  flowOptions={{
+    iOS: {
+      url: flowUrl,
+      // any other iOS options go here
+    },
+    android: {
+      url: flowUrl,
+      // any other Android options go here
+    },
+  }}
+  deepLink={deepLink} // the optional deep link we defined earlier via `useState`
+  onReady={() => {
+    // logic to display the flow when it's ready
+  }}
+  onSuccess={async (jwtResponse) => {
+    try {
+      await manageSession(jwtResponse)
+    } catch (e) {
+      // handle session management error
     }
-  }
-  const resp = await flow.start('<URL_FOR_FLOW_IN_SETUP_#1>', '<URL_FOR_APP_LINK_IN_SETUP_#2>', '<OPTIONAL_CUSTOM_SCHEME_FROM_SETUP_#2>', flowAuthentication)
-  await manageSession(resp.data)
-} catch (e) {
-  // handle errors
-}
+  }}
+  onError={(error: string) => {
+    // handle flow errors here
+  }}
+/>
 ```
-
-When running on iOS nothing else is required. When running on Android, `flow.exchange()` function must be called.
-See the [app link setup](#-android-only--setup-2--enable-app-links) for more details.
 
 ## Use the `useDescope` and `useSession` hooks in your components in order to get authentication state, user details and utilities
 

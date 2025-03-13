@@ -68,7 +68,7 @@ const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostCompone
  * a set of callbacks when the Flow is `ready` to be presented, and finished in a `success` or `error` state.
  * @returns The Descope FlowView component
  */
-export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: string; style?: ViewStyle; onReady?: () => unknown; onSuccess?: (jwtResponse: JWTResponse) => {}; onError?: (error: string) => {} }) {
+export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: string; style?: ViewStyle; onReady?: () => unknown; onSuccess?: (jwtResponse: JWTResponse) => unknown; onError?: (error: string) => unknown }) {
   const onReadyCb = useCallback(() => {
     props.onReady?.()
   }, [props.onReady])
