@@ -175,12 +175,18 @@ export type FlowAuthentication = {
 
 /** Provide options when embedding a FlowView into your app */
 export type FlowOptions = {
+  android: AndroidFlowOptions
+  iOS: iOSFlowOptions
+}
+
+/** Android specific flow options */
+export type AndroidFlowOptions = {
   /** The URL where the flow is hosted */
   url: string
   /**
-   * The ID of the oauth provider that is configured to natively "Sign In with Google"
-   * or "Sign In with Apple". Will likely be "google" or "apple" (according to platform) if the
-   * Descope "Google" or "Apple" provider were customized, or alternatively a custom provider ID.
+   * The ID of the oauth provider that is configured to natively "Sign In with Google".
+   * Will likely be "google" if the Descope "Google" was customized,
+   * or alternatively a custom provider ID.
    */
   oauthNativeProvider?: string
   /**
@@ -218,8 +224,25 @@ export type FlowOptions = {
    */
   ssoRedirectCustomScheme?: string
   /**
-   * An optional deep link link URL to use when sending magic link emails, overriding
-   * whatever is configured in the flow or project
+   * An optional deep link link URL to use when sending magic link emails or SMS messages,
+   * overriding whatever is configured in the flow or project
+   */
+  magicLinkRedirect?: string
+}
+
+/** iOS specific flow options */
+export type iOSFlowOptions = {
+  /** The URL where the flow is hosted */
+  url: string
+  /**
+   * The ID of the oauth provider that is configured to natively "Sign In with Apple".
+   * Will likely be "apple" if the Descope "Apple" provider was customized,
+   * or alternatively a custom provider ID.
+   */
+  oauthNativeProvider?: string
+  /**
+   * An optional deep link link URL to use when sending magic link emails or SMS messages,
+   * overriding whatever is configured in the flow or project
    */
   magicLinkRedirect?: string
 }

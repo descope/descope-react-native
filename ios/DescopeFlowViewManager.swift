@@ -29,12 +29,13 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
     }
     
     @objc func setFlowOptions(_ dict: NSDictionary) {
-        guard let url = dict["url"] as? String else { return }
+        guard let options = dict["iOS"] as? NSDictionary else { return }
+        guard let url = options["url"] as? String else { return }
         var descopeFlow = DescopeFlow(url: url)
-        if let oauthNativeProvder = dict["oauthNativeProvider"] as? String {
+        if let oauthNativeProvder = options["oauthNativeProvider"] as? String {
             descopeFlow.oauthNativeProvider = OAuthProvider(stringLiteral: oauthNativeProvder)
         }
-        if let magicLinkRedirect = dict["magicLinkRedirect"] as? String {
+        if let magicLinkRedirect = options["magicLinkRedirect"] as? String {
             descopeFlow.magicLinkRedirect = magicLinkRedirect
         }
         
