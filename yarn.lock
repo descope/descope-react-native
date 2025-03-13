@@ -1831,12 +1831,12 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@descope/core-js-sdk@2.20.4":
-  version "2.20.4"
-  resolved "https://registry.yarnpkg.com/@descope/core-js-sdk/-/core-js-sdk-2.20.4.tgz#443876890978e7355349edc81896a45366fae487"
-  integrity sha512-tib9cI4HorZUyVOqA9DPss7TzVebXCvQrExjRu7f4kMkWkfLmMJgqUuwuCqAnkHCoLrN4EEYeP7MZ6RK/UZ14Q==
+"@descope/core-js-sdk@2.38.0":
+  version "2.38.0"
+  resolved "https://registry.yarnpkg.com/@descope/core-js-sdk/-/core-js-sdk-2.38.0.tgz#2363f7672b02094132f757f5bc4e6c0426523bbc"
+  integrity sha512-IDhvQJ4u0w958KsBp4HamTAqoNXl5i+gU261DrQ14/R2mABz7SRYJ+UxFBSpbUY9KGk2Qba0WrHpzXnUPwuQAw==
   dependencies:
-    jwt-decode "3.1.2"
+    jwt-decode "4.0.0"
 
 "@eslint-community/eslint-utils@^4.2.0":
   version "4.4.0"
@@ -6895,10 +6895,10 @@ jsonparse@^1.2.0:
     object.assign "^4.1.4"
     object.values "^1.1.6"
 
-jwt-decode@3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-3.1.2.tgz#3fb319f3675a2df0c2895c8f5e9fa4b67b04ed59"
-  integrity sha512-UfpWE/VZn0iP50d8cz9NrZLM9lSWhcJ+0Gt/nm4by88UL+J1SiKN8/5dkjMmbEzwL2CAe+67GsegCbIKtbp75A==
+jwt-decode@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-4.0.0.tgz#2270352425fd413785b2faf11f6e755c5151bd4b"
+  integrity sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==
 
 keyv@^4.5.3, keyv@^4.5.4:
   version "4.5.4"
