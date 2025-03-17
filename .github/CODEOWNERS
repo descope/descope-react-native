@@ -1,0 +1,4 @@
+*gradle* @itaihanski @shilgapira
+*.properties @itaihanski @shilgapira
+package.json @itaihanski @shilgapira
+/example/package.json @itaihanski @shilgapira
