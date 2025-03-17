@@ -5,14 +5,11 @@ import android.content.Context
 import android.net.Uri
 import com.descope.android.DescopeFlow
 import com.descope.android.DescopeFlowView
-import com.descope.internal.others.toJsonArray
-import com.descope.internal.others.toJsonObject
 import com.descope.types.AuthenticationResponse
 import com.descope.types.DescopeException
 import com.descope.types.DescopeUser
 import com.descope.types.OAuthProvider
 import com.facebook.react.bridge.Arguments
-import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
@@ -22,6 +19,7 @@ import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.uimanager.events.Event
+import org.json.JSONArray
 import org.json.JSONObject
 
 const val REACT_CLASS = "DescopeFlowView"
@@ -181,4 +179,26 @@ private fun DescopeUser.toJson() = JSONObject().apply {
   givenName?.run { put("givenName", this) }
   middleName?.run { put("middleName", this) }
   familyName?.run { put("familyName", this) }
+}
+
+private fun List<*>.toJsonArray(): JSONArray = JSONArray().apply {
+  this@toJsonArray.forEach {
+    when {
+      it is Map<*, *> -> put(it.toJsonObject())
+      it is List<*> -> put(it.toJsonArray())
+      it != null -> put(it)
+    }
+  }
+}
+
+private fun Map<*, *>.toJsonObject(): JSONObject = JSONObject().apply {
+  forEach {
+    val key = it.key as String
+    val value = it.value
+    when {
+      value is Map<*, *> -> put(key, value.toJsonObject())
+      value is List<*> -> put(key, value.toJsonArray())
+      value != null -> put(key, value)
+    }
+  }
 }
