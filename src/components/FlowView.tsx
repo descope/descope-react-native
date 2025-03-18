@@ -46,9 +46,9 @@ const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostCompone
  *
  * **Android Setup**
  *
- *    - **IMPORTANT NOTE**: even though Application links are the recommended way to configure
- *      deep links, some browsers, such as Opera, do not honor them and open the URLs inline.
- *      It is possible to circumvent this issue by using a custom scheme, albeit less secure.
+ * - **IMPORTANT NOTE**: even though Application links are the recommended way to configure
+ * deep links, some browsers, such as Opera, do not honor them and open the URLs inline.
+ * It is possible to circumvent this issue by using a custom scheme, albeit less secure.
  *
  * - Beyond that, in order to use navigation / redirection based authentication,
  * namely `Magic Link`, `OAuth (social)` and SSO, it's required to set up app links.
@@ -64,7 +64,7 @@ const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostCompone
  * `Client Secret` should be set to the values of your `Web application` OAuth client,
  * rather than those from the `Android` OAuth client.
  * For more details about configuring your app see the [Credential Manager documentation](https://developer.android.com/identity/sign-in/credential-manager).
- * @param props iOS and Android specific flow options to set up the flow, a `deepLink` to continue redirect based authentication
+ * @param props Flow options to set up the flow, a `deepLink` to continue redirect based authentication
  * a set of callbacks when the Flow is `ready` to be presented, and finished in a `success` or `error` state.
  * @returns The Descope FlowView component
  */

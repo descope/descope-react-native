@@ -55,12 +55,11 @@ class DescopeFlowViewManager() : SimpleViewManager<DescopeFlowView>(), DescopeFl
   )
 
   @ReactProp(name = "flowOptions")
-  fun setFlowOptions(descopeFlowView: DescopeFlowView, flowOptions: ReadableMap?) {
-    if (flowOptions == null) return
-    val options = flowOptions.getMap("android") ?: return
+  fun setFlowOptions(descopeFlowView: DescopeFlowView, options: ReadableMap?) {
+    if (options == null) return
     val url = options.getString("url") ?: return
     val descopeFlow = DescopeFlow(Uri.parse(url))
-    options.getString("oauthNativeProvider")?.run { descopeFlow.oauthNativeProvider = OAuthProvider(name = this) }
+    options.getString("androidOAuthNativeProvider")?.run { descopeFlow.oauthNativeProvider = OAuthProvider(name = this) }
     descopeFlow.oauthRedirect = options.getString("oauthRedirect")
     descopeFlow.oauthRedirectCustomScheme = options.getString("oauthRedirectCustomScheme")
     descopeFlow.ssoRedirect = options.getString("ssoRedirect")

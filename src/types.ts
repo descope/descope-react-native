@@ -131,22 +131,22 @@ export type FlowAuthentication = {
 
 /** Provide options when embedding a FlowView into your app */
 export type FlowOptions = {
-  android: AndroidFlowOptions
-  iOS: iOSFlowOptions
-}
-
-/** Android specific flow options */
-export type AndroidFlowOptions = {
   /** The URL where the flow is hosted */
   url: string
   /**
    * The ID of the oauth provider that is configured to natively "Sign In with Google".
-   * Will likely be "google" if the Descope "Google" was customized,
+   * Will likely be "google" if the Descope "Google" provider was customized,
    * or alternatively a custom provider ID.
    */
-  oauthNativeProvider?: string
+  androidOAuthNativeProvider?: string
   /**
-   * An optional deep link link URL to use when performing OAuth authentication, overriding
+   * The ID of the oauth provider that is configured to natively "Sign In with Apple".
+   * Will likely be "apple" if the Descope "Apple" provider was customized,
+   * or alternatively a custom provider ID.
+   */
+  iosOAuthNativeProvider?: string
+  /**
+   * (_Android Only_) An optional deep link link URL to use when performing OAuth authentication, overriding
    * whatever is configured in the flow or project.
    * - **IMPORTANT NOTE**: even though App Links are the recommended way to configure
    * deep links, some browsers, such as Opera, do not respect them and open the URLs inline.
@@ -154,7 +154,7 @@ export type AndroidFlowOptions = {
    */
   oauthRedirect?: string
   /**
-   * An optional custom scheme based URL, e.g. `mycustomscheme://myhost`,
+   * (_Android Only_) An optional custom scheme based URL, e.g. `mycustomscheme://myhost`,
    * to use when performing OAuth authentication overriding whatever is configured in the flow or project.
    * Functionally, this URL is exactly the same as [oauthRedirect], and will be used in its stead, only
    * when the user has a default browser that does not honor App Links by default.
@@ -163,7 +163,7 @@ export type AndroidFlowOptions = {
    */
   oauthRedirectCustomScheme?: string
   /**
-   * An optional deep link link URL to use performing SSO authentication, overriding
+   * (_Android Only_) An optional deep link link URL to use performing SSO authentication, overriding
    * whatever is configured in the flow or project
    * - **IMPORTANT NOTE**: even though App Links are the recommended way to configure
    * deep links, some browsers, such as Opera, do not respect them and open the URLs inline.
@@ -171,7 +171,7 @@ export type AndroidFlowOptions = {
    */
   ssoRedirect?: string
   /**
-   * An optional custom scheme based URL, e.g. `mycustomscheme://myhost`,
+   * (_Android Only_) An optional custom scheme based URL, e.g. `mycustomscheme://myhost`,
    * to use when performing SSO authentication overriding whatever is configured in the flow or project.
    * Functionally, this URL is exactly the same as [ssoRedirect], and will be used in its stead, only
    * when the user has a default browser that does not honor App Links by default.
@@ -179,23 +179,6 @@ export type AndroidFlowOptions = {
    * of being handled by the application.
    */
   ssoRedirectCustomScheme?: string
-  /**
-   * An optional deep link link URL to use when sending magic link emails or SMS messages,
-   * overriding whatever is configured in the flow or project
-   */
-  magicLinkRedirect?: string
-}
-
-/** iOS specific flow options */
-export type iOSFlowOptions = {
-  /** The URL where the flow is hosted */
-  url: string
-  /**
-   * The ID of the oauth provider that is configured to natively "Sign In with Apple".
-   * Will likely be "apple" if the Descope "Apple" provider was customized,
-   * or alternatively a custom provider ID.
-   */
-  oauthNativeProvider?: string
   /**
    * An optional deep link link URL to use when sending magic link emails or SMS messages,
    * overriding whatever is configured in the flow or project

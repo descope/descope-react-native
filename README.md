@@ -272,14 +272,10 @@ const flowUrl = 'https://myflowUrl.com'
 <FlowView
   style={styles.fill}
   flowOptions={{
-    iOS: {
       url: flowUrl,
-      // any other iOS options go here
-    },
-    android: {
-      url: flowUrl,
-      // any other Android options go here
-    },
+      androidOAuthNativeProvider: 'google',
+      iosOAuthNativeProvider: 'apple',
+      // any other options go here
   }}
   deepLink={deepLink} // the optional deep link we defined earlier via `useState`
   onReady={() => {

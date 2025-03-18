@@ -28,11 +28,10 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
         Descope.handleURL(url)
     }
     
-    @objc func setFlowOptions(_ dict: NSDictionary) {
-        guard let options = dict["iOS"] as? NSDictionary else { return }
+    @objc func setFlowOptions(_ options: NSDictionary) {
         guard let url = options["url"] as? String else { return }
-        var descopeFlow = DescopeFlow(url: url)
-        if let oauthNativeProvder = options["oauthNativeProvider"] as? String {
+        let descopeFlow = DescopeFlow(url: url)
+        if let oauthNativeProvder = options["iosOAuthNativeProvider"] as? String {
             descopeFlow.oauthNativeProvider = OAuthProvider(stringLiteral: oauthNativeProvder)
         }
         if let magicLinkRedirect = options["magicLinkRedirect"] as? String {
@@ -63,11 +62,14 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
     }
     
     func flowViewDidFail(_ flowView: DescopeFlowView, error: DescopeError) {
-        onFlowError?([
+        var errorInfo: [String: Any] = [
             "errorCode": error.code,
-            "errorDescription": error.localizedDescription,
-            "errorMessage": error.message
-        ])
+            "errorDescription": error.desc,
+        ]
+        if let message = error.message {
+            errorInfo["errorMessage"] = message
+        }
+        onFlowError?(errorInfo)
     }
     
     func flowViewDidFinish(_ flowView: DescopeFlowView, response: AuthenticationResponse) {
