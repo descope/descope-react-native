@@ -109,8 +109,11 @@ class AuthorizationDelegate: NSObject, ASAuthorizationControllerDelegate {
 
 #if os(iOS) && canImport(React)
 extension AuthenticationResponse: Codable {
-    enum CodingKeys: CodingKey {
-        case sessionToken, refreshToken, user, isFirstAuthentication
+    enum CodingKeys: String, CodingKey {
+        case sessionToken = "sessionJwt"
+        case refreshToken = "refreshJwt"
+        case user
+        case isFirstAuthentication
     }
 
     public init(from decoder: Decoder) throws {

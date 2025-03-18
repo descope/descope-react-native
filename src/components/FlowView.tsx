@@ -1,12 +1,12 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, type SyntheticEvent } from 'react'
 import { requireNativeComponent, type HostComponent, type ViewStyle } from 'react-native'
 import type { DescopeError, FlowOptions } from '../types'
 import type { JWTResponse } from '@descope/core-js-sdk'
 
 type DescopeFlowView = {
-  onFlowReady: (event: any) => unknown
-  onFlowSuccess: (event: any) => unknown
-  onFlowError: (event: any) => unknown
+  onFlowReady?: () => void
+  onFlowSuccess?: (event: SyntheticEvent<never, { response: string }>) => void
+  onFlowError?: (event: SyntheticEvent<never, { errorCode: string; errorDescription: string; errorMessage?: string }>) => void
 }
 
 const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostComponent<DescopeFlowView>
@@ -70,23 +70,18 @@ const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostCompone
  */
 export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: string; style?: ViewStyle; onReady?: () => unknown; onSuccess?: (jwtResponse: JWTResponse) => unknown; onError?: (error: DescopeError) => unknown }) {
   const { onReady, onSuccess, onError } = props
-  const onReadyCb = useCallback(() => {
-    onReady?.()
-  }, [onReady])
 
   const onSuccessHook = useCallback(
-    (event: any) => {
+    (event: SyntheticEvent<never, { response: string }>) => {
       const rawResponse = JSON.parse(event.nativeEvent.response)
       const jwtResponse = rawResponse as JWTResponse
-      jwtResponse.sessionJwt = jwtResponse.sessionJwt ?? rawResponse.sessionToken
-      jwtResponse.refreshJwt = jwtResponse.refreshJwt ?? rawResponse.refreshToken
       onSuccess?.(jwtResponse)
     },
     [onSuccess],
   )
 
-  const onErrorCb = useCallback(
-    (event: any) => {
+  const onErrorHook = useCallback(
+    (event: SyntheticEvent<never, { errorCode: string; errorDescription: string; errorMessage?: string }>) => {
       const error = {
         errorCode: event.nativeEvent.errorCode,
         errorDescription: event.nativeEvent.errorDescription,
@@ -96,5 +91,5 @@ export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: s
     },
     [onError],
   )
-  return <DescopeFlowView {...props} onFlowReady={onReadyCb} onFlowSuccess={onSuccessHook} onFlowError={onErrorCb} />
+  return <DescopeFlowView {...props} onFlowReady={onReady} onFlowSuccess={onSuccessHook} onFlowError={onErrorHook} />
 }
