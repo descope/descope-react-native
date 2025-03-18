@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C6DA6A982D5A3D1500ACE686 /* DescopeFlowViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C6DA6A972D5A3CED00ACE686 /* DescopeFlowViewManager.m */; };
+		C6DA6A9A2D5B51B100ACE686 /* DescopeFlowViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6DA6A992D5B51A800ACE686 /* DescopeFlowViewManager.swift */; };
 		F4FF95D7245B92E800C19C63 /* DescopeReactNative.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /* DescopeReactNative.swift */; };
 /* End PBXBuildFile section */
 
@@ -25,6 +27,53 @@
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libDescopeReactNative.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libDescopeReactNative.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3E7B5891CC2AC0600A0062D /* DescopeReactNative.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DescopeReactNative.mm; sourceTree = "<group>"; };
+		C67F74C42D81BC71003BCCA9 /* DescopeKit.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = DescopeKit.docc; sourceTree = "<group>"; };
+		C67F74C62D81BC71003BCCA9 /* URLRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLRequest.swift; sourceTree = "<group>"; };
+		C67F74C82D81BC71003BCCA9 /* Flow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flow.swift; sourceTree = "<group>"; };
+		C67F74C92D81BC71003BCCA9 /* FlowBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowBridge.swift; sourceTree = "<group>"; };
+		C67F74CA2D81BC71003BCCA9 /* FlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowCoordinator.swift; sourceTree = "<group>"; };
+		C67F74CB2D81BC71003BCCA9 /* FlowHook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowHook.swift; sourceTree = "<group>"; };
+		C67F74CC2D81BC71003BCCA9 /* FlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowView.swift; sourceTree = "<group>"; };
+		C67F74CD2D81BC71003BCCA9 /* FlowViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowViewController.swift; sourceTree = "<group>"; };
+		C67F74CF2D81BC71003BCCA9 /* ClientErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientErrors.swift; sourceTree = "<group>"; };
+		C67F74D02D81BC71003BCCA9 /* DescopeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DescopeClient.swift; sourceTree = "<group>"; };
+		C67F74D12D81BC71003BCCA9 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
+		C67F74D22D81BC71003BCCA9 /* UserAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAgent.swift; sourceTree = "<group>"; };
+		C67F74D42D81BC71003BCCA9 /* FlowsV0Flow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowsV0Flow.swift; sourceTree = "<group>"; };
+		C67F74D52D81BC71003BCCA9 /* FlowsV0Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowsV0Protocol.swift; sourceTree = "<group>"; };
+		C67F74D62D81BC71003BCCA9 /* FlowsV0Runner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowsV0Runner.swift; sourceTree = "<group>"; };
+		C67F74D82D81BC71003BCCA9 /* Deprecated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deprecated.swift; sourceTree = "<group>"; };
+		C67F74D92D81BC71003BCCA9 /* Internal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internal.swift; sourceTree = "<group>"; };
+		C67F74DA2D81BC71003BCCA9 /* WebAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAuth.swift; sourceTree = "<group>"; };
+		C67F74DC2D81BC71003BCCA9 /* AccessKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessKey.swift; sourceTree = "<group>"; };
+		C67F74DD2D81BC71003BCCA9 /* Auth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Auth.swift; sourceTree = "<group>"; };
+		C67F74DE2D81BC71003BCCA9 /* EnchantedLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnchantedLink.swift; sourceTree = "<group>"; };
+		C67F74DF2D81BC71003BCCA9 /* MagicLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MagicLink.swift; sourceTree = "<group>"; };
+		C67F74E02D81BC71003BCCA9 /* OAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth.swift; sourceTree = "<group>"; };
+		C67F74E12D81BC71003BCCA9 /* OTP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTP.swift; sourceTree = "<group>"; };
+		C67F74E22D81BC71003BCCA9 /* Passkey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Passkey.swift; sourceTree = "<group>"; };
+		C67F74E32D81BC71003BCCA9 /* Password.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Password.swift; sourceTree = "<group>"; };
+		C67F74E42D81BC71003BCCA9 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
+		C67F74E52D81BC71003BCCA9 /* SSO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSO.swift; sourceTree = "<group>"; };
+		C67F74E62D81BC71003BCCA9 /* TOTP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TOTP.swift; sourceTree = "<group>"; };
+		C67F74E92D81BC71003BCCA9 /* Callbacks.stencil */ = {isa = PBXFileReference; lastKnownFileType = text; path = Callbacks.stencil; sourceTree = "<group>"; };
+		C67F74EA2D81BC71003BCCA9 /* Callbacks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Callbacks.swift; sourceTree = "<group>"; };
+		C67F74EB2D81BC71003BCCA9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		C67F74EC2D81BC71003BCCA9 /* Routes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routes.swift; sourceTree = "<group>"; };
+		C67F74ED2D81BC71003BCCA9 /* SDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDK.swift; sourceTree = "<group>"; };
+		C67F74EF2D81BC71003BCCA9 /* Lifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lifecycle.swift; sourceTree = "<group>"; };
+		C67F74F02D81BC71003BCCA9 /* Manager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Manager.swift; sourceTree = "<group>"; };
+		C67F74F12D81BC71003BCCA9 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		C67F74F22D81BC71003BCCA9 /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
+		C67F74F32D81BC71003BCCA9 /* Token.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
+		C67F74F52D81BC71003BCCA9 /* Error.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
+		C67F74F62D81BC71003BCCA9 /* Others.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Others.swift; sourceTree = "<group>"; };
+		C67F74F72D81BC71003BCCA9 /* Responses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Responses.swift; sourceTree = "<group>"; };
+		C67F74F82D81BC71003BCCA9 /* Tenant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tenant.swift; sourceTree = "<group>"; };
+		C67F74F92D81BC71003BCCA9 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		C67F74FB2D81BC71003BCCA9 /* DescopeKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DescopeKit.swift; sourceTree = "<group>"; };
+		C6DA6A972D5A3CED00ACE686 /* DescopeFlowViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DescopeFlowViewManager.m; sourceTree = "<group>"; };
+		C6DA6A992D5B51A800ACE686 /* DescopeFlowViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DescopeFlowViewManager.swift; sourceTree = "<group>"; };
 		F4FF95D5245B92E700C19C63 /* DescopeReactNative-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DescopeReactNative-Bridging-Header.h"; sourceTree = "<group>"; };
 		F4FF95D6245B92E800C19C63 /* DescopeReactNative.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DescopeReactNative.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -51,11 +100,154 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				C660526B2D788717003D4721 /* descope-swift-sdk */,
+				C6DA6A992D5B51A800ACE686 /* DescopeFlowViewManager.swift */,
+				C6DA6A972D5A3CED00ACE686 /* DescopeFlowViewManager.m */,
 				F4FF95D6245B92E800C19C63 /* DescopeReactNative.swift */,
 				B3E7B5891CC2AC0600A0062D /* DescopeReactNative.mm */,
 				F4FF95D5245B92E700C19C63 /* DescopeReactNative-Bridging-Header.h */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		C660526B2D788717003D4721 /* descope-swift-sdk */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74C52D81BC71003BCCA9 /* docs */,
+				C67F74C72D81BC71003BCCA9 /* extensions */,
+				C67F74CE2D81BC71003BCCA9 /* flows */,
+				C67F74E82D81BC71003BCCA9 /* internal */,
+				C67F74EE2D81BC71003BCCA9 /* sdk */,
+				C67F74F42D81BC71003BCCA9 /* session */,
+				C67F74FA2D81BC71003BCCA9 /* types */,
+				C67F74FB2D81BC71003BCCA9 /* DescopeKit.swift */,
+			);
+			path = "descope-swift-sdk";
+			sourceTree = "<group>";
+		};
+		C67F74C52D81BC71003BCCA9 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74C42D81BC71003BCCA9 /* DescopeKit.docc */,
+			);
+			path = docs;
+			sourceTree = "<group>";
+		};
+		C67F74C72D81BC71003BCCA9 /* extensions */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74C62D81BC71003BCCA9 /* URLRequest.swift */,
+			);
+			path = extensions;
+			sourceTree = "<group>";
+		};
+		C67F74CE2D81BC71003BCCA9 /* flows */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74C82D81BC71003BCCA9 /* Flow.swift */,
+				C67F74C92D81BC71003BCCA9 /* FlowBridge.swift */,
+				C67F74CA2D81BC71003BCCA9 /* FlowCoordinator.swift */,
+				C67F74CB2D81BC71003BCCA9 /* FlowHook.swift */,
+				C67F74CC2D81BC71003BCCA9 /* FlowView.swift */,
+				C67F74CD2D81BC71003BCCA9 /* FlowViewController.swift */,
+			);
+			path = flows;
+			sourceTree = "<group>";
+		};
+		C67F74D32D81BC71003BCCA9 /* http */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74CF2D81BC71003BCCA9 /* ClientErrors.swift */,
+				C67F74D02D81BC71003BCCA9 /* DescopeClient.swift */,
+				C67F74D12D81BC71003BCCA9 /* HTTPClient.swift */,
+				C67F74D22D81BC71003BCCA9 /* UserAgent.swift */,
+			);
+			path = http;
+			sourceTree = "<group>";
+		};
+		C67F74D72D81BC71003BCCA9 /* FlowsV0 */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74D42D81BC71003BCCA9 /* FlowsV0Flow.swift */,
+				C67F74D52D81BC71003BCCA9 /* FlowsV0Protocol.swift */,
+				C67F74D62D81BC71003BCCA9 /* FlowsV0Runner.swift */,
+			);
+			path = FlowsV0;
+			sourceTree = "<group>";
+		};
+		C67F74DB2D81BC71003BCCA9 /* others */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74D72D81BC71003BCCA9 /* FlowsV0 */,
+				C67F74D82D81BC71003BCCA9 /* Deprecated.swift */,
+				C67F74D92D81BC71003BCCA9 /* Internal.swift */,
+				C67F74DA2D81BC71003BCCA9 /* WebAuth.swift */,
+			);
+			path = others;
+			sourceTree = "<group>";
+		};
+		C67F74E72D81BC71003BCCA9 /* routes */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74DC2D81BC71003BCCA9 /* AccessKey.swift */,
+				C67F74DD2D81BC71003BCCA9 /* Auth.swift */,
+				C67F74DE2D81BC71003BCCA9 /* EnchantedLink.swift */,
+				C67F74DF2D81BC71003BCCA9 /* MagicLink.swift */,
+				C67F74E02D81BC71003BCCA9 /* OAuth.swift */,
+				C67F74E12D81BC71003BCCA9 /* OTP.swift */,
+				C67F74E22D81BC71003BCCA9 /* Passkey.swift */,
+				C67F74E32D81BC71003BCCA9 /* Password.swift */,
+				C67F74E42D81BC71003BCCA9 /* Shared.swift */,
+				C67F74E52D81BC71003BCCA9 /* SSO.swift */,
+				C67F74E62D81BC71003BCCA9 /* TOTP.swift */,
+			);
+			path = routes;
+			sourceTree = "<group>";
+		};
+		C67F74E82D81BC71003BCCA9 /* internal */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74D32D81BC71003BCCA9 /* http */,
+				C67F74DB2D81BC71003BCCA9 /* others */,
+				C67F74E72D81BC71003BCCA9 /* routes */,
+			);
+			path = internal;
+			sourceTree = "<group>";
+		};
+		C67F74EE2D81BC71003BCCA9 /* sdk */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74E92D81BC71003BCCA9 /* Callbacks.stencil */,
+				C67F74EA2D81BC71003BCCA9 /* Callbacks.swift */,
+				C67F74EB2D81BC71003BCCA9 /* Config.swift */,
+				C67F74EC2D81BC71003BCCA9 /* Routes.swift */,
+				C67F74ED2D81BC71003BCCA9 /* SDK.swift */,
+			);
+			path = sdk;
+			sourceTree = "<group>";
+		};
+		C67F74F42D81BC71003BCCA9 /* session */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74EF2D81BC71003BCCA9 /* Lifecycle.swift */,
+				C67F74F02D81BC71003BCCA9 /* Manager.swift */,
+				C67F74F12D81BC71003BCCA9 /* Session.swift */,
+				C67F74F22D81BC71003BCCA9 /* Storage.swift */,
+				C67F74F32D81BC71003BCCA9 /* Token.swift */,
+			);
+			path = session;
+			sourceTree = "<group>";
+		};
+		C67F74FA2D81BC71003BCCA9 /* types */ = {
+			isa = PBXGroup;
+			children = (
+				C67F74F52D81BC71003BCCA9 /* Error.swift */,
+				C67F74F62D81BC71003BCCA9 /* Others.swift */,
+				C67F74F72D81BC71003BCCA9 /* Responses.swift */,
+				C67F74F82D81BC71003BCCA9 /* Tenant.swift */,
+				C67F74F92D81BC71003BCCA9 /* User.swift */,
+			);
+			path = types;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -115,7 +307,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C6DA6A982D5A3D1500ACE686 /* DescopeFlowViewManager.m in Sources */,
 				F4FF95D7245B92E800C19C63 /* DescopeReactNative.swift in Sources */,
+				C6DA6A9A2D5B51B100ACE686 /* DescopeFlowViewManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,6 +420,7 @@
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 				);
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = DescopeReactNative;
@@ -245,6 +440,7 @@
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 				);
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = DescopeReactNative;

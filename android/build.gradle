@@ -8,9 +8,10 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:7.2.2"
+    classpath "com.android.tools.build:gradle:8.7.2"
     // noinspection DifferentKotlinGradleVersion
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    classpath("com.facebook.react:react-native-gradle-plugin")
   }
 }
 
@@ -73,6 +74,10 @@ android {
     }
   }
 
+  buildFeatures {
+    buildConfig true
+  }
+
   lintOptions {
     disable "GradleCompatible"
   }
@@ -95,13 +100,18 @@ repositories {
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
-  // For < 0.71, this will be from the local maven repo
-  // For > 0.71, this will be replaced by `com.facebook.react:react-android:$version` by react gradle plugin
   //noinspection GradleDynamicVersion
-  implementation "com.facebook.react:react-native:+"
+  implementation "com.facebook.react:react-android:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  api "androidx.browser:browser:1.5.0"
-  api "androidx.security:security-crypto:1.0.0"
+  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
+  implementation "androidx.lifecycle:lifecycle-common:2.8.7"
+  implementation "androidx.lifecycle:lifecycle-process:2.8.7"
+  implementation "androidx.browser:browser:1.8.0"
+  implementation "androidx.security:security-crypto:1.0.0"
+  implementation "androidx.credentials:credentials:1.3.0"
+  implementation "androidx.credentials:credentials-play-services-auth:1.3.0"
+  implementation "com.google.android.libraries.identity.googleid:googleid:1.1.1"
+  implementation 'com.descope:descope-kotlin:0.13.3'
 }
 
 if (isNewArchitectureEnabled()) {

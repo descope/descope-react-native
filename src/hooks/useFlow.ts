@@ -7,6 +7,9 @@ import DescopeReactNative from '../internal/modules/descopeModule'
 import type { DescopeFlow, FlowAuthentication } from '../types'
 import useDescope from './useDescope'
 
+/**
+ * @deprecated The hook is now deprecated. Use `FlowView` component instead.
+ */
 const useFlow = (): DescopeFlow => {
   const { logger } = useContext()
   const sdk = useDescope()
