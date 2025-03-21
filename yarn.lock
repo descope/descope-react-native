@@ -1831,10 +1831,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@descope/core-js-sdk@2.39.0":
-  version "2.39.0"
-  resolved "https://registry.yarnpkg.com/@descope/core-js-sdk/-/core-js-sdk-2.39.0.tgz#b18dc3fbbbc1e1698c83d7cb76a4bdfee87afe26"
-  integrity sha512-1UlqKLCyQIwnGfkwEel0EA2u2eqHfCE661w5GbHt0qBVTrRxGYHE5XGq8kJT8lTnoyxpKAIB7Pu5ab2aV3jCsg==
+"@descope/core-js-sdk@2.40.0":
+  version "2.40.0"
+  resolved "https://registry.yarnpkg.com/@descope/core-js-sdk/-/core-js-sdk-2.40.0.tgz#73008ad9f2e81a0aacaeef315d65f5533af71b9a"
+  integrity sha512-hFr/SzQO0QbyDaI1LlN//HKi3hXNJAnU0lFUpsqwo92YmCvYzhSZ7r6aBvT0DU2jaXmvt/0Y9TyNQuEKsGpT/A==
   dependencies:
     jwt-decode "4.0.0"
 
