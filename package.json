@@ -54,7 +54,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "@descope/core-js-sdk": "2.39.0",
+    "@descope/core-js-sdk": "2.40.0",
     "base-64": "^1.0.0"
   },
   "devDependencies": {
