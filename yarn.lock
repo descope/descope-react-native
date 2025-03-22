@@ -8126,10 +8126,10 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-pod-install@^0.1.0:
-  version "0.1.39"
-  resolved "https://registry.yarnpkg.com/pod-install/-/pod-install-0.1.39.tgz#853a0585bafbd332c2ca6543854fd4919958cfb3"
-  integrity sha512-0kVvdLYe0CtfJEr+ISvTMxAEB0UF4JMRToPjuu9xAAq1mEqA2Ql5u7uLWX1m45BMM+7NfU4LnBbnfNjmQE9GCw==
+pod-install@^0.3.0:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/pod-install/-/pod-install-0.3.4.tgz#8d6ad22a3e42d8014ee0363378d4bd782b8152d5"
+  integrity sha512-I6ObV36HNvbM5/QI8IEZ61ot41p8eBB9Zm0Bc9Sw99v9JzdNvwxg6IS2ZbZbJ0KvLWnUCIL1mIiFhJTLVF5r1w==
 
 prelude-ls@^1.2.1:
   version "1.2.1"
