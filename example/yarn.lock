@@ -1515,16 +1515,6 @@
     fast-glob "^3.3.2"
     fast-xml-parser "^4.4.1"
 
-"@react-native-community/cli-config-apple@15.1.3":
-  version "15.1.3"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-config-apple/-/cli-config-apple-15.1.3.tgz#fa9aab320d6f8fa3319fef9304e442dd11884d58"
-  integrity sha512-Qv6jaEaycv+7s8wR9l9bdpIeSNFCeVANfGCX1x76SgOmGfZNIa7J3l1HaeF/5ktERMYsw/hm4u3rUn4Ks0YV1g==
-  dependencies:
-    "@react-native-community/cli-tools" "15.1.3"
-    chalk "^4.1.2"
-    execa "^5.0.0"
-    fast-glob "^3.3.2"
-
 "@react-native-community/cli-config-apple@16.0.2":
   version "16.0.2"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-config-apple/-/cli-config-apple-16.0.2.tgz#0f4ebe4dea45fc19ca658546408a943c5db210a0"
@@ -1587,17 +1577,6 @@
     execa "^5.0.0"
     logkitty "^0.7.1"
 
-"@react-native-community/cli-platform-apple@15.1.3":
-  version "15.1.3"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-apple/-/cli-platform-apple-15.1.3.tgz#e8cd6d7edad60ee21e38d9c338332645a05d05e3"
-  integrity sha512-awotqCGVcTdeRmTlE3wlsZgNxZUDGojUhPYOVMKejgdCzNM2bvzF8fqhETH2sc64Hbw/tQJg8pYeD4MZR0bHxw==
-  dependencies:
-    "@react-native-community/cli-config-apple" "15.1.3"
-    "@react-native-community/cli-tools" "15.1.3"
-    chalk "^4.1.2"
-    execa "^5.0.0"
-    fast-xml-parser "^4.4.1"
-
 "@react-native-community/cli-platform-apple@16.0.2":
   version "16.0.2"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-apple/-/cli-platform-apple-16.0.2.tgz#852254477660cb52e0773bdc911bea0afaf16646"
@@ -1608,13 +1587,6 @@
     chalk "^4.1.2"
     execa "^5.0.0"
     fast-xml-parser "^4.4.1"
-
-"@react-native-community/cli-platform-ios@15.1.3":
-  version "15.1.3"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-ios/-/cli-platform-ios-15.1.3.tgz#57d119796b2eab49565131cdfefcf22211a8fdad"
-  integrity sha512-DxM8GYkqjrlGuuGiGjrcvUmKC2xv9zDzHbsc4+S160Nn0zbF2OH1DhMlnIuUeCmQnAO6QFMqU99O120iEzCAug==
-  dependencies:
-    "@react-native-community/cli-platform-apple" "15.1.3"
 
 "@react-native-community/cli-platform-ios@16.0.2":
   version "16.0.2"
@@ -1637,23 +1609,6 @@
     pretty-format "^26.6.2"
     serve-static "^1.13.1"
     ws "^6.2.3"
-
-"@react-native-community/cli-tools@15.1.3":
-  version "15.1.3"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-tools/-/cli-tools-15.1.3.tgz#354863cefd8e39e674c072c6b18a1ac4d4497d30"
-  integrity sha512-2RzoUKR+Y03ijBeeSoCSQihyN6dxy3fbHjraO4MheZZUzt/Yd1VMEDd0R5aa6rtiRDoknbHt45RL2GMa8MSaEA==
-  dependencies:
-    appdirsjs "^1.2.4"
-    chalk "^4.1.2"
-    execa "^5.0.0"
-    find-up "^5.0.0"
-    mime "^2.4.1"
-    open "^6.2.0"
-    ora "^5.4.1"
-    prompts "^2.4.2"
-    semver "^7.5.2"
-    shell-quote "^1.7.3"
-    sudo-prompt "^9.0.0"
 
 "@react-native-community/cli-tools@16.0.2":
   version "16.0.2"
