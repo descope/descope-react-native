@@ -2175,16 +2175,6 @@
     execa "^5.0.0"
     fast-glob "^3.3.2"
 
-"@react-native-community/cli-config-android@15.1.3":
-  version "15.1.3"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-config-android/-/cli-config-android-15.1.3.tgz#c1d91246291c8584ab7bafc63198860d86884f24"
-  integrity sha512-v9okV/WQfMJEWRddI0S6no2v9Lvk54KgFkw1mvMYhJKVqloCNsIWzoqme0u7zIuYSzwsjXUQXVlGiDzbbwdkBw==
-  dependencies:
-    "@react-native-community/cli-tools" "15.1.3"
-    chalk "^4.1.2"
-    fast-glob "^3.3.2"
-    fast-xml-parser "^4.4.1"
-
 "@react-native-community/cli-config-android@16.0.2":
   version "16.0.2"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-config-android/-/cli-config-android-16.0.2.tgz#ea8de2adedfff8c6174ffa796a1646e2edecfc82"
@@ -2255,17 +2245,6 @@
     strip-ansi "^5.2.0"
     wcwidth "^1.0.1"
     yaml "^2.2.1"
-
-"@react-native-community/cli-platform-android@15.1.3":
-  version "15.1.3"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-15.1.3.tgz#c10c434ea559414b00ca3297a4aabbbba16647c8"
-  integrity sha512-ZwrBK0UK4DRHoQm2v5m8+PlNHBK5gmibBU6rqNFLo4aZJ2Rufalbv3SF+DukgSyoI9/kI8UVrzSNj17e+HhN5A==
-  dependencies:
-    "@react-native-community/cli-config-android" "15.1.3"
-    "@react-native-community/cli-tools" "15.1.3"
-    chalk "^4.1.2"
-    execa "^5.0.0"
-    logkitty "^0.7.1"
 
 "@react-native-community/cli-platform-android@16.0.2":
   version "16.0.2"
