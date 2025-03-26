@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.6",
-    "@react-native-community/cli": "16.0.2",
+    "@react-native-community/cli": "18.0.0",
     "@react-native-community/cli-platform-android": "16.0.2",
     "@react-native-community/cli-platform-ios": "16.0.2",
     "@react-native-community/eslint-config": "^3.2.0",
