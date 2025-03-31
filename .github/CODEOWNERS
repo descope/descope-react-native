@@ -2,3 +2,4 @@
 *.properties @itaihanski @shilgapira
 package.json @itaihanski @shilgapira
 /example/package.json @itaihanski @shilgapira
+.nvmrc @itaihanski @shilgapira
