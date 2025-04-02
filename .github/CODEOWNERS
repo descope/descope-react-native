@@ -1,4 +1,5 @@
-*gradle* @itaihanski @shilgapira
-*.properties @itaihanski @shilgapira
-package.json @itaihanski @shilgapira
-/example/package.json @itaihanski @shilgapira
+*gradle* @itaihanski @shilgapira @asafshen
+*.properties @itaihanski @shilgapira @asafshen
+package.json @itaihanski @shilgapira @asafshen
+/example/package.json @itaihanski @shilgapira @asafshen
+.nvmrc @itaihanski @shilgapira @asafshen
