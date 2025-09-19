@@ -9,7 +9,7 @@
     "pods": "pod-install --quiet"
   },
   "dependencies": {
-    "react": "18.3.1",
+    "react": "19.1.1",
     "react-native": "0.77.0"
   },
   "devDependencies": {
