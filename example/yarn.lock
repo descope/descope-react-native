@@ -1762,14 +1762,14 @@
     serve-static "^1.16.2"
     ws "^6.2.3"
 
-"@react-native/eslint-config@^0.77.0":
-  version "0.77.0"
-  resolved "https://registry.yarnpkg.com/@react-native/eslint-config/-/eslint-config-0.77.0.tgz#2f43c9753ef205dfd115600571cdce09bcf40674"
-  integrity sha512-azEiJNe/v1MjXE5Cekn8ygV4an0T3mNem4Afmeaq9tO9rfbOYr3VpTMFgc4B42SZgS4S6lyIqvwTfc8bSp0KRw==
+"@react-native/eslint-config@^0.81.0":
+  version "0.81.1"
+  resolved "https://registry.yarnpkg.com/@react-native/eslint-config/-/eslint-config-0.81.1.tgz#481ed8d093f42f5dd44a6fa6cddb1af3ad6ba3f6"
+  integrity sha512-Ljn2H34G0+2LIwEwYTjwpjB+Z4KnMN5FuNbfX5B3j6YAcAFt8DVppNVTVE2dKyId5DIweOZ93Yf4zj6v+jxzYw==
   dependencies:
     "@babel/core" "^7.25.2"
     "@babel/eslint-parser" "^7.25.1"
-    "@react-native/eslint-plugin" "0.77.0"
+    "@react-native/eslint-plugin" "0.81.1"
     "@typescript-eslint/eslint-plugin" "^7.1.1"
     "@typescript-eslint/parser" "^7.1.1"
     eslint-config-prettier "^8.5.0"
@@ -1777,13 +1777,13 @@
     eslint-plugin-ft-flow "^2.0.1"
     eslint-plugin-jest "^27.9.0"
     eslint-plugin-react "^7.30.1"
-    eslint-plugin-react-hooks "^4.6.0"
+    eslint-plugin-react-hooks "^5.2.0"
     eslint-plugin-react-native "^4.0.0"
 
-"@react-native/eslint-plugin@0.77.0":
-  version "0.77.0"
-  resolved "https://registry.yarnpkg.com/@react-native/eslint-plugin/-/eslint-plugin-0.77.0.tgz#1a59a1899da3b3c4a6f599f589cbf6802c22d70f"
-  integrity sha512-1DXUDiqsgvFpK633SsOF01aAtWAaI/+KqPJAoZOVdSsodk70wNYyrHpF9rJBXWhyT/peTBE5y2kK2kT/Y7JcQA==
+"@react-native/eslint-plugin@0.81.1":
+  version "0.81.1"
+  resolved "https://registry.yarnpkg.com/@react-native/eslint-plugin/-/eslint-plugin-0.81.1.tgz#1762f398634fa6c99b4e95104212be40e26abc7d"
+  integrity sha512-uo/3+yz7IpHRBnZOyvWBGQgPSzXqLyBlRRGsAG5s5wHK+8B1+sbUd3JeZn11A01KnZtYry7kBPJ59IpHk1Hn4g==
 
 "@react-native/gradle-plugin@0.77.0":
   version "0.77.0"
@@ -3065,10 +3065,10 @@ eslint-plugin-jest@^27.9.0:
   dependencies:
     "@typescript-eslint/utils" "^5.10.0"
 
-eslint-plugin-react-hooks@^4.6.0:
-  version "4.6.0"
-  resolved "https://registry.npmjs.org/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-4.6.0.tgz"
-  integrity sha512-oFc7Itz9Qxh2x4gNHStv3BqJq54ExXmfC+a1NjAta66IAN87Wu0R/QArgIS9qKzX3dXKPI9H5crl9QchNMY9+g==
+eslint-plugin-react-hooks@^5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-5.2.0.tgz#1be0080901e6ac31ce7971beed3d3ec0a423d9e3"
+  integrity sha512-+f15FfK64YQwZdJNELETdn5ibXEUQmW1DZL6KXhNnc2heoy/sg9VJJeT7n8TlMWouzWqSWavFkIhHyIbIAEapg==
 
 eslint-plugin-react-native-globals@^0.1.1:
   version "0.1.2"
