@@ -2,6 +2,8 @@
 
 The Descope SDK for React Native provides convenient access to Descope for an application written on top of React Native. You can read more on the [Descope Website](https://descope.com).
 
+> Our React Native SDK doesn't currently support Expo. If you are using Expo, you can still use Descope by following the [Expo OIDC](https://www.descope.com/blog/post/expo-authentication) integration guide.
+
 ## Requirements
 
 - A Descope `Project ID` is required for using the SDK. Find it on the [project page in the Descope Console](https://app.descope.com/settings/project).
