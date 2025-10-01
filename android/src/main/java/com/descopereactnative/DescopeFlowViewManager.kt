@@ -21,6 +21,7 @@ import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.uimanager.events.Event
 import org.json.JSONArray
 import org.json.JSONObject
+import androidx.core.net.toUri
 
 const val REACT_CLASS = "DescopeFlowView"
 
@@ -58,7 +59,7 @@ class DescopeFlowViewManager() : SimpleViewManager<DescopeFlowView>(), DescopeFl
   fun setFlowOptions(descopeFlowView: DescopeFlowView, options: ReadableMap?) {
     if (options == null) return
     val url = options.getString("url") ?: return
-    val descopeFlow = DescopeFlow(Uri.parse(url))
+    val descopeFlow = DescopeFlow(url)
     options.getString("androidOAuthNativeProvider")?.run { descopeFlow.oauthNativeProvider = OAuthProvider(name = this) }
     descopeFlow.oauthRedirect = options.getString("oauthRedirect")
     descopeFlow.oauthRedirectCustomScheme = options.getString("oauthRedirectCustomScheme")
@@ -68,12 +69,12 @@ class DescopeFlowViewManager() : SimpleViewManager<DescopeFlowView>(), DescopeFl
 
     this.descopeFlowView = descopeFlowView
     descopeFlowView.listener = this
-    descopeFlowView.run(descopeFlow)
+    descopeFlowView.startFlow(descopeFlow)
   }
 
   @ReactProp(name = "deepLink")
   fun setDeepLink(descopeFlowView: DescopeFlowView, deepLink: String?) {
-    deepLink?.run { descopeFlowView.resumeFromDeepLink(Uri.parse(this)) }
+    deepLink?.run { descopeFlowView.resumeFromDeepLink(this.toUri()) }
   }
 
   // Flow Listener
