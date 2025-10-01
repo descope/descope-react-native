@@ -24,6 +24,8 @@ When targeting iOS, make sure to navigate into the `ios` folder and install the 
 pod install
 ```
 
+**NOTE:** The Android native code is compiled using Kotlin v2.2.0 and Gradle plugin v8.13
+
 ## Usage
 
 ### Wrap your app with Auth Provider
