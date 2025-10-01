@@ -14,6 +14,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import java.security.MessageDigest
 import kotlin.random.Random
+import androidx.core.net.toUri
+import androidx.core.content.edit
 
 private const val prefName = "com.descope.reactnative"
 
@@ -53,12 +55,12 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
     if (flowUrl.isEmpty()) return promise.reject("empty_url", "'flowUrl' is required when calling startFlow")
 
     // embed into url parameters
-    val uriBuilder = Uri.parse(flowUrl).buildUpon()
+    val uriBuilder = flowUrl.toUri().buildUpon()
       .appendQueryParameter("ra-callback", deepLinkUrl)
       .appendQueryParameter("ra-challenge", codeChallenge)
       .appendQueryParameter("ra-initiator", "android")
     if (backupCustomScheme.isNotEmpty()) {
-        uriBuilder.appendQueryParameter("ra-backup-callback", backupCustomScheme)
+      uriBuilder.appendQueryParameter("ra-backup-callback", backupCustomScheme)
     }
     val uri = uriBuilder.build()
 
@@ -72,8 +74,8 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
   @ReactMethod
   fun resumeFlow(flowUrl: String, incomingUrl: String, promise: Promise) {
     // create the redirect flow URL by copying all url parameters received from the incoming URI
-    val incomingUri = Uri.parse(incomingUrl)
-    val uriBuilder = Uri.parse(flowUrl).buildUpon()
+    val incomingUri = incomingUrl.toUri()
+    val uriBuilder = flowUrl.toUri().buildUpon()
     incomingUri.queryParameterNames.forEach { uriBuilder.appendQueryParameter(it, incomingUri.getQueryParameter(it)) }
     val uri = uriBuilder.build()
 
@@ -129,27 +131,23 @@ private class EncryptedStorage(context: Context) {
 
   fun loadItem(key: String): String? = sharedPreferences.getString(key, null)
 
-  fun saveItem(key: String, data: String) = sharedPreferences.edit()
-    .putString(key, data)
-    .apply()
+  fun saveItem(key: String, data: String) = sharedPreferences.edit { putString(key, data) }
 
-  fun removeItem(key: String) = sharedPreferences.edit()
-    .remove(key)
-    .apply()
+  fun removeItem(key: String) = sharedPreferences.edit { remove(key) }
 }
 
 private fun createEncryptedStore(context: Context): EncryptedStorage? {
-    return try {
-        EncryptedStorage(context)
+  return try {
+    EncryptedStorage(context)
+  } catch (e: Exception) {
+    try {
+      // encrypted storage key unusable - deleting and recreating
+      // see google issue https://issuetracker.google.com/issues/164901843
+      context.deleteSharedPreferences(prefName)
+      EncryptedStorage(context)
     } catch (e: Exception) {
-        try {
-            // encrypted storage key unusable - deleting and recreating
-            // see google issue https://issuetracker.google.com/issues/164901843
-            context.deleteSharedPreferences(prefName)
-            EncryptedStorage(context)
-        } catch (e: Exception) {
-            // unable to initialize encrypted storage
-            null
-        }
+      // unable to initialize encrypted storage
+      null
     }
+  }
 }

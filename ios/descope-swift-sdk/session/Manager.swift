@@ -1,6 +1,17 @@
 
 import Foundation
 
+/// A set of delegate methods for events about the session managed by a ``DescopeSessionManager``.
+@MainActor
+public protocol DescopeSessionManagerDelegate: AnyObject {
+    /// Called after the session tokens are updated due to a successful refresh or by
+    /// a call to ``DescopeSessionManager/updateTokens(with:)``.
+    func sessionManagerDidUpdateTokens(_ sessionManager: DescopeSessionManager, session: DescopeSession)
+
+    /// Called after the session user is updated by a call to ``DescopeSessionManager/updateUser(with:)``.
+    func sessionManagerDidUpdateUser(_ sessionManager: DescopeSessionManager, session: DescopeSession)
+}
+
 /// The ``DescopeSessionManager`` class is used to manage an authenticated
 /// user session for an application.
 ///
@@ -61,9 +72,9 @@ import Foundation
 /// Descope.sessionManager.clearSession()
 /// ```
 ///
-/// You can also remove remove the user's refresh JWT from the Descope servers once
-/// it becomes redundant. See the documentation for the ``DescopeAuth/revokeSessions(_:refreshJwt:)``
-/// function for more details.
+/// You can also remove the user's refresh token from the Descope servers once\
+/// it becomes redundant after the user is signed out. See the documentation for
+/// the ``DescopeAuth/revokeSessions(_:refreshJwt:)`` function for more details.
 ///
 /// You can customize how the ``DescopeSessionManager`` behaves by using your own
 /// `storage` and `lifecycle` objects. See the documentation for the ``init(storage:lifecycle:)``
@@ -76,7 +87,7 @@ public class DescopeSessionManager {
     /// The object that handles session lifecycle for this manager.
     private let lifecycle: DescopeSessionLifecycle
 
-    /// The active ``DescopeSession`` managed by this object.
+    /// The ``DescopeSession`` managed by this object.
     public var session: DescopeSession? {
         return lifecycle.session
     }
@@ -97,6 +108,7 @@ public class DescopeSessionManager {
         self.storage = storage
         self.lifecycle = lifecycle
         self.lifecycle.session = storage.loadSession()
+        self.lifecycle.onPeriodicRefresh = { [weak self] in self?.didUpdateTokens() }
     }
     
     /// Set an active ``DescopeSession`` in this manager.
@@ -114,8 +126,17 @@ public class DescopeSessionManager {
     ///     unless they use custom `storage` objects they might overwrite
     ///     each other's saved sessions.
     public func manageSession(_ session: DescopeSession) {
+        let current = lifecycle.session
+
         lifecycle.session = session
-        saveSession()
+        storage.saveSession(session)
+
+        if let current, current.sessionJwt != session.sessionJwt || current.refreshJwt != session.refreshJwt {
+            delegates.forEach { $0.sessionManagerDidUpdateTokens(self, session: session) }
+        }
+        if let current, current.user != session.user {
+            delegates.forEach { $0.sessionManagerDidUpdateUser(self, session: session) }
+        }
     }
 
     /// Clears any active ``DescopeSession`` from this manager and removes it
@@ -134,17 +155,6 @@ public class DescopeSessionManager {
         lifecycle.session = nil
         storage.removeSession()
     }
-    
-    /// Saves the active ``DescopeSession`` to the storage.
-    ///
-    /// - Important: There is usually no need to call this method directly.
-    ///     The session is automatically saved when it's refreshed or updated,
-    ///     unless you're using a session manager with custom `stroage` and
-    ///     `lifecycle` objects.
-    public func saveSession() {
-        guard let session else { return }
-        storage.saveSession(session)
-    }
 
     /// Ensures that the session is valid and refreshes it if needed.
     ///
@@ -157,10 +167,27 @@ public class DescopeSessionManager {
     public func refreshSessionIfNeeded() async throws {
         let refreshed = try await lifecycle.refreshSessionIfNeeded()
         if refreshed {
-            saveSession()
+            didUpdateTokens()
         }
     }
-    
+
+    /// Adds a delegate object to the session manager.
+    ///
+    /// - Important: The session manager keeps `weak` references to its delegate objects,
+    ///     so make make sure any object you add as a delegate is retained elsewhere.
+    public func addDelegate(_ delegate: DescopeSessionManagerDelegate) {
+        delegates.add(delegate)
+    }
+
+    /// Removes a delegate object that was previously added.
+    ///
+    /// The session manager keeps `weak` references to its delegate objects, so there's
+    /// usually no need to call this method for objects that are about to be deallocated
+    /// anyway.
+    public func removeDelegate(_ delegate: DescopeSessionManagerDelegate) {
+        delegates.remove(delegate)
+    }
+
     /// Updates the active session's underlying JWTs.
     ///
     /// This function accepts a ``RefreshResponse`` value as a parameter which is returned
@@ -176,9 +203,9 @@ public class DescopeSessionManager {
     ///     ``DescopeSessionStorage`` protocol.
     public func updateTokens(with refreshResponse: RefreshResponse) {
         lifecycle.session?.updateTokens(with: refreshResponse)
-        saveSession()
+        didUpdateTokens()
     }
-    
+
     /// Updates the active session's user details.
     ///
     /// This function accepts a ``DescopeUser`` value as a parameter which is returned by
@@ -194,6 +221,22 @@ public class DescopeSessionManager {
     /// but this can be overridden with a custom ``DescopeSessionStorage`` object.
     public func updateUser(with user: DescopeUser) {
         lifecycle.session?.updateUser(with: user)
-        saveSession()
+        didUpdateUser()
+    }
+
+    // Internal
+
+    private var delegates = WeakCollection<DescopeSessionManagerDelegate>()
+
+    private func didUpdateTokens() {
+        guard let session else { return }
+        storage.saveSession(session)
+        delegates.forEach { $0.sessionManagerDidUpdateTokens(self, session: session) }
+    }
+
+    private func didUpdateUser() {
+        guard let session else { return }
+        storage.saveSession(session)
+        delegates.forEach { $0.sessionManagerDidUpdateUser(self, session: session) }
     }
 }

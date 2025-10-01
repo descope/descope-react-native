@@ -13,25 +13,29 @@ public enum Descope {
     /// You will most likely want to call this function in your application's initialization code,
     /// and in most cases you'll only need to specify the `projectId`:
     ///
-    ///     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-    ///         Descope.setup(projectId: "<Your-Project-Id>")
-    ///     }
+    /// ```swift
+    /// func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    ///     Descope.setup(projectId: "<Your-Project-Id>")
+    /// }
+    /// ```
     ///
     /// You can also pass a closure to this function to perform additional configuration.
     /// For example, if you want to enable debugging logs in the Descope SDK during development
     /// and you have a separate Descope project you use as a staging environment when building
     /// and testing beta versions, you can do something like this:
     ///
-    ///     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-    ///         Descope.setup(projectId: "<Production-Project-Id>") { config in
-    ///             #if DEBUG
-    ///             config.logger = DescopeLogger(level: .debug)
-    ///             #endif
-    ///             if AppConfig.isBetaBuild {
-    ///                 config.projectId = "<Staging-Project-Id>"
-    ///             }
+    /// ```swift
+    /// func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    ///     Descope.setup(projectId: "<Production-Project-Id>") { config in
+    ///         #if DEBUG
+    ///         config.logger = .debugLogger
+    ///         #endif
+    ///         if AppConfig.isBetaBuild {
+    ///             config.projectId = "<Staging-Project-Id>"
     ///         }
     ///     }
+    /// }
+    /// ```
     ///
     /// - Parameters:
     ///   - projectId: The id of the Descope project can be found in
@@ -47,10 +51,12 @@ public enum Descope {
     ///
     /// You can use this ``DescopeSessionManager`` object as a shared instance to manage
     /// authenticated sessions in your application.
-    /// 
-    ///     let authResponse = try await Descope.otp.verify(with: .email, loginId: "andy@example.com", code: "123456")
-    ///     let session = DescopeSession(from: authResponse)
-    ///     Descope.sessionManager.manageSession(session)
+    ///
+    /// ```swift
+    /// let authResponse = try await Descope.otp.verify(with: .email, loginId: "andy@example.com", code: "123456")
+    /// let session = DescopeSession(from: authResponse)
+    /// Descope.sessionManager.manageSession(session)
+    /// ```
     ///
     /// See the documentation for ``DescopeSessionManager`` for more details.
     @MainActor
@@ -140,7 +146,7 @@ public extension Descope {
     ///
     /// - Returns: `true` when an ongoing authentication handled the URL or `false` to
     ///     let the caller know that the function didn't handle it.
-    @discardableResult @MainActor
+    @MainActor @discardableResult
     static func handleURL(_ url: URL) -> Bool {
         return sdk.handleURL(url)
     }

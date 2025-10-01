@@ -50,7 +50,7 @@ class HTTPClient {
         return 15
     }
     
-    func errorForResponseData(_ data: Data) -> Error? {
+    func errorForResponseData(_ data: Data) -> DescopeError? {
         return nil
     }
     
@@ -58,32 +58,55 @@ class HTTPClient {
     
     private func call(_ route: String, method: String, headers: [String: String], params: [String: String?], body: Data?) async throws -> (Data, HTTPURLResponse) {
         let request = try makeRequest(route: route, method: method, headers: headers, params: params, body: body)
-        logger(.info, "Starting network call", request.url)
-        #if DEBUG
-        if let body = request.httpBody, let requestBody = String(bytes: body, encoding: .utf8) {
-            logger(.debug, "Sending request body", requestBody)
+        if logger.isUnsafeEnabled {
+            logger.info("Starting network call", request.url)
+            if let body = request.httpBody, let requestBody = String(bytes: body, encoding: .utf8) {
+                logger.debug("Sending request body", requestBody)
+            }
+        } else {
+            logger.info("Starting network call to \(route)")
         }
-        #endif
-        
-        let (data, response) = try await sendRequest(request)
-        
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await networkClient.call(request: request)
+        } catch {
+            if logger.isUnsafeEnabled {
+                logger.error("Network call failed with network error", request.url, error)
+            } else {
+                logger.error("Network call to \(route) failed with \((error as NSError).code) network error")
+            }
+            throw DescopeError.networkError.with(cause: error)
+        }
+
         guard let response = response as? HTTPURLResponse else { throw DescopeError(httpError: .invalidResponse) }
-        #if DEBUG
-        if let responseBody = String(bytes: data, encoding: .utf8) {
-            logger(.debug, "Received response body", responseBody)
+        if logger.isUnsafeEnabled, let responseBody = String(bytes: data, encoding: .utf8) {
+            logger.debug("Received response body", responseBody)
         }
-        #endif
-        
+
         if let error = DescopeError(httpStatusCode: response.statusCode) {
             if let responseError = errorForResponseData(data) {
-                logger(.info, "Network call failed with server error", request.url, responseError)
+                if logger.isUnsafeEnabled {
+                    logger.error("Network call failed with server error", request.url, responseError)
+                } else {
+                    logger.error("Network call to \(route) failed with \(responseError.code) server error")
+                }
                 throw responseError
             }
-            logger(.info, "Network call failed with http error", request.url, error)
+            if logger.isUnsafeEnabled {
+                logger.error("Network call failed with \(response.statusCode) http error", request.url, error)
+            } else {
+                logger.error("Network call to \(route) failed with \(response.statusCode) http error")
+            }
             throw error
         }
         
-        logger(.info, "Network call finished", request.url)
+        if logger.isUnsafeEnabled {
+            logger.info("Network call finished", request.url)
+        } else {
+            logger.info("Network call to \(route) finished")
+        }
+
         return (data, response)
     }
     
@@ -108,15 +131,6 @@ class HTTPClient {
         }
         guard let url = components.url else { throw DescopeError(httpError: .invalidRoute) }
         return url
-    }
-    
-    private func sendRequest(_ request: URLRequest) async throws -> (Data, URLResponse) {
-        do {
-            return try await networkClient.call(request: request)
-        } catch {
-            logger(.error, "Network call failed with network error", request.url, error)
-            throw DescopeError.networkError.with(cause: error)
-        }
     }
 }
 
@@ -167,11 +181,8 @@ private extension Dictionary {
 
 // HTTP Headers
 
-private let userAgent = makeUserAgent()
-
 private func mergeHeaders(_ headers: [String: String], with defaults: [String: String], for request: URLRequest) -> [String: String] {
     var result = request.allHTTPHeaderFields ?? [:]
-    result["User-Agent"] = userAgent
     if request.httpBody != nil {
         result["Content-Type"] = "application/json"
     }

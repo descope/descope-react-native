@@ -39,6 +39,35 @@ public protocol DescopeAuth: Sendable {
     /// - Returns: A new ``RefreshResponse`` with a refreshed `sessionJwt`.
     func refreshSession(refreshJwt: String) async throws -> RefreshResponse
     
+    /// Migrates an external token to a ``DescopeSession``.
+    ///
+    /// This function migrates an active user authentication that was done with a different
+    /// authentication provider so it can be used with Descope, thereby allowing the user
+    /// to continue using the app without requiring them to sign in again or otherwise
+    /// notice any change in behavior.
+    ///
+    /// ```swift
+    /// func migrateUserAuthentication() async throws {
+    ///     // assume we have an active login from an authentication that was done with another auth provider
+    ///     guard let externalToken = otherAuthProvider.authToken else { return }
+    ///
+    ///     // exchange the external token and get a Descope authentication in return
+    ///     let authResponse = try await Descope.auth.migrateSession(externalToken: externalToken)
+    ///
+    ///     // we now have an AuthenticationResponse as if the user went through a Descope sign in call
+    ///     let session = DescopeSession(from: authResponse)
+    ///     Descope.sessionManager.manageSession(session)
+    /// }
+    /// ```
+    ///
+    /// This function is only available if the Descope console was configured to allow
+    /// external tokens, otherwise the call will fail.
+    ///
+    /// - Parameter externalToken: the external token to migrate.
+    ///
+    /// - Returns: A new ``AuthenticationResponse`` if the migration was successful.
+    func migrateSession(externalToken: String) async throws -> AuthenticationResponse
+
     /// Revokes active sessions for the user.
     ///
     /// It's a good security practice to remove refresh JWTs from the Descope servers if

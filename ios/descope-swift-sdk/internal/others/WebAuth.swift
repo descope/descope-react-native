@@ -32,7 +32,7 @@ private func presentWebAuthentication(url: URL, accessSharedUserData: Bool, logg
             }
 
             cancellation = { @MainActor [weak session] in
-                logger(.info, "Web authentication cancelled programmatically")
+                logger.info("Web authentication cancelled programmatically")
                 session?.cancel()
             }
 
@@ -47,19 +47,19 @@ private func presentWebAuthentication(url: URL, accessSharedUserData: Bool, logg
 
     switch result {
     case .failure(ASWebAuthenticationSessionError.canceledLogin):
-        logger(.info, "Web authentication cancelled by user")
+        logger.info("Web authentication cancelled by user")
         throw DescopeError.webAuthCancelled
     case .failure(ASWebAuthenticationSessionError.presentationContextInvalid):
-        logger(.error, "Invalid presentation context for web authentication")
+        logger.error("Invalid presentation context for web authentication")
         throw DescopeError.webAuthFailed.with(message: "Invalid presentation context")
     case .failure(ASWebAuthenticationSessionError.presentationContextNotProvided):
-        logger(.error, "No presentation context for web authentication")
+        logger.error("No presentation context for web authentication")
         throw DescopeError.webAuthFailed.with(message: "No presentation context")
     case .failure(let error):
-        logger(.error, "Unexpected error from web authentication", error)
+        logger.error("Unexpected error from web authentication", error)
         throw DescopeError.webAuthFailed.with(cause: error)
     case .success(let callbackURL):
-        logger(.debug, "Processing OAuth web authentication", callbackURL)
+        logger.debug("Processing OAuth web authentication", callbackURL)
         return callbackURL
     }
 }

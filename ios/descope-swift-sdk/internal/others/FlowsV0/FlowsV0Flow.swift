@@ -22,7 +22,7 @@ final class _Flow: _DescopeFlow, Route {
         if let flowAuthentication = runner.flowAuthentication {
             try await client.flowPrime(codeChallenge: codeChallenge, flowId: flowAuthentication.flowId, refreshJwt: flowAuthentication.refreshJwt)
         }
-        logger(.info, "Starting flow authentication", initialURL)
+        logger.info("Starting flow authentication", initialURL)
         
         // sets the flow we're about to present as the current flow
         current = runner
@@ -71,14 +71,14 @@ final class _Flow: _DescopeFlow, Route {
                 // protects against the completion handler being called multiple times, e.g.,
                 // in case the session is cancelled or another call to `run` in recursion
                 // will be responsible to call it
-                guard !completed else { return logger(.debug, "Skipping previous web session completion") }
+                guard !completed else { return logger.debug("Skipping previous web session completion") }
                 completed = true
                 
                 // parse the URL we got from the flow to get the authorization code
                 let result: Result<String, Error>
                 do {
                     let code = try parseAuthorizationCode(callbackURL, error)
-                    logger(.info, "Received flow authorization code")
+                    logger.info("Received flow authorization code")
                     result = .success(code)
                 } catch {
                     result = .failure(error)
@@ -87,7 +87,7 @@ final class _Flow: _DescopeFlow, Route {
                 // if this is a recursive call to `run` we close any previous sessions,
                 // otherwise we might have lingering browser windows
                 for session in sessions {
-                    logger(.debug, "Cancelling previous web session", session)
+                    logger.debug("Cancelling previous web session", session)
                     session.cancel()
                 }
                 
@@ -109,21 +109,21 @@ final class _Flow: _DescopeFlow, Route {
         }
         
         // opens the flow in a sandboxed browser view
-        logger(.info, "Presenting web session", session)
+        logger.info("Presenting web session", session)
         session.presentationContextProvider = contextProvider
         session.start()
         
         Task {
             do {
-                logger(.debug, "Polling for runner cancellation or redirect")
+                logger.debug("Polling for runner cancellation or redirect")
                 while !completed {
                     guard !runner.isCancelled else { throw DescopeError.flowCancelled }
                     
                     if let pendingURL = runner.pendingURL {
-                        logger(.debug, "Handling redirect url for flow authentication", pendingURL)
+                        logger.debug("Handling redirect url for flow authentication", pendingURL)
                         runner.pendingURL = nil
                         guard let nextURL = prepareRedirectRequest(for: runner, redirectURL: pendingURL) else { continue }
-                        logger(.info, "Redirecting flow authentication", nextURL)
+                        logger.info("Redirecting flow authentication", nextURL)
                         completed = true
                         return run(runner, url: nextURL, codeVerifier: codeVerifier, sessions: sessions+[session], completion: completion)
                     }
@@ -131,7 +131,7 @@ final class _Flow: _DescopeFlow, Route {
                     try await Task.sleep(nanoseconds: 100 * NSEC_PER_MSEC)
                 }
             } catch {
-                logger(.info, "Flow authentication cancelled")
+                logger.info("Flow authentication cancelled")
                 completed = true
                 for session in sessions {
                     session.cancel()
@@ -154,14 +154,14 @@ final class _Flow: _DescopeFlow, Route {
         if let error {
             switch error {
             case ASWebAuthenticationSessionError.canceledLogin:
-                logger(.info, "Flow authentication cancelled by user")
+                logger.info("Flow authentication cancelled by user")
                 throw DescopeError.flowCancelled
             case ASWebAuthenticationSessionError.presentationContextInvalid:
-                logger(.error, "Invalid presentation context for flow authentication web session", error)
+                logger.error("Invalid presentation context for flow authentication web session", error)
             case ASWebAuthenticationSessionError.presentationContextNotProvided:
-                logger(.error, "No presentation context for flow authentication web session", error)
+                logger.error("No presentation context for flow authentication web session", error)
             default:
-                logger(.error, "Unexpected error from flow authentication web session", error)
+                logger.error("Unexpected error from flow authentication web session", error)
             }
             throw DescopeError.flowFailed.with(cause: error)
         }
@@ -176,7 +176,7 @@ final class _Flow: _DescopeFlow, Route {
     @MainActor
     private func resetRunner(_ runner: DescopeFlowRunner) {
         guard current === runner else { return }
-        logger(.debug, "Resetting current flow runner property")
+        logger.debug("Resetting current flow runner property")
         current = nil
     }
 }

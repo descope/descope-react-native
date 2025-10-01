@@ -7,9 +7,12 @@ import Foundation
 public protocol DescopeSessionLifecycle: AnyObject {
     /// Holds the latest session value for the session manager.
     var session: DescopeSession? { get set }
-    
+
     /// Called by the session manager to conditionally refresh the active session.
     func refreshSessionIfNeeded() async throws -> Bool
+
+    /// The session manager sets this closure so it can be notified of successful periodic refreshes.
+    var onPeriodicRefresh: () -> Void { get set }
 }
 
 /// The default implementation of the ``DescopeSessionLifecycle`` protocol.
@@ -19,15 +22,15 @@ public protocol DescopeSessionLifecycle: AnyObject {
 /// will refresh the session if it's about to expire (within 60 seconds by default)
 /// or if it's already expired.
 public class SessionLifecycle: DescopeSessionLifecycle {
-    public let auth: DescopeAuth
-    public let storage: DescopeSessionStorage
-    public let logger: DescopeLogger?
+    private let auth: DescopeAuth
+    private let logger: DescopeLogger?
 
-    public init(auth: DescopeAuth, storage: DescopeSessionStorage, logger: DescopeLogger?) {
+    public init(auth: DescopeAuth, config: DescopeConfig) {
         self.auth = auth
-        self.storage = storage
-        self.logger = logger
+        self.logger = config.logger
     }
+
+    public var onPeriodicRefresh: () -> Void = {}
 
     public var refreshTriggerInterval: TimeInterval = 60 /* seconds */
     
@@ -39,15 +42,13 @@ public class SessionLifecycle: DescopeSessionLifecycle {
         }
     }
 
-    public var shouldSaveAfterPeriodicRefresh: Bool = true
-
     public var session: DescopeSession? {
         didSet {
             if session?.refreshJwt != oldValue?.refreshJwt {
                 resetTimer()
             }
             if let session, session.refreshToken.isExpired {
-                logger(.debug, "Session has an expired refresh token", session.refreshToken.expiresAt)
+                logger.debug("Session has an expired refresh token", session.refreshToken.expiresAt)
             }
         }
     }
@@ -55,11 +56,11 @@ public class SessionLifecycle: DescopeSessionLifecycle {
     public func refreshSessionIfNeeded() async throws -> Bool {
         guard let current = session, shouldRefresh(current) else { return false }
 
-        logger(.info, "Refreshing session that is about to expire", current.sessionToken.expiresAt.timeIntervalSinceNow)
+        logger.info("Refreshing session that is about to expire", current.sessionToken.expiresAt.timeIntervalSinceNow)
         let response = try await auth.refreshSession(refreshJwt: current.refreshJwt)
 
         guard session?.sessionJwt == current.sessionJwt else {
-            logger(.info, "Skipping refresh because session has changed in the meantime")
+            logger.info("Skipping refresh because session has changed in the meantime")
             return false
         }
 
@@ -108,21 +109,21 @@ public class SessionLifecycle: DescopeSessionLifecycle {
 
     private func periodicRefresh() async {
         if let refreshToken = session?.refreshToken, refreshToken.isExpired {
-            logger(.debug, "Stopping periodic refresh for session with expired refresh token")
+            logger.debug("Stopping periodic refresh for session with expired refresh token")
             stopTimer()
             return
         }
 
         do {
             let refreshed = try await refreshSessionIfNeeded()
-            if refreshed, shouldSaveAfterPeriodicRefresh, let session {
-                logger(.debug, "Saving refresh session after periodic refresh")
-                storage.saveSession(session)
+            if refreshed {
+                logger.debug("Periodic session refresh succeeded")
+                onPeriodicRefresh()
             }
         } catch DescopeError.networkError {
-            logger(.debug, "Ignoring network error in periodic refresh")
+            logger.debug("Ignoring network error in periodic refresh")
         } catch {
-            logger(.error, "Stopping periodic refresh after failure", error)
+            logger.error("Stopping periodic refresh after failure", error)
             stopTimer()
         }
     }

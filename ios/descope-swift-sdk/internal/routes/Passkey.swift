@@ -12,13 +12,13 @@ final class Passkey: DescopePasskey, Route {
     @MainActor
     @available(iOS 15.0, *)
     func signUp(loginId: String, details: SignUpDetails?) async throws -> AuthenticationResponse {
-        logger(.info, "Starting passkey sign up", loginId)
+        logger.info("Starting passkey sign up", loginId)
         let startResponse = try await client.passkeySignUpStart(loginId: loginId, details: details)
         
-        logger(.info, "Requesting register authorization for passkey sign up", startResponse.transactionId)
+        logger.info("Requesting register authorization for passkey sign up", startResponse.transactionId)
         let registerResponse = try await performRegister(options: startResponse.options)
         
-        logger(.info, "Finishing passkey sign up", startResponse.transactionId)
+        logger.info("Finishing passkey sign up", startResponse.transactionId)
         let jwtResponse = try await client.passkeySignUpFinish(transactionId: startResponse.transactionId, response: registerResponse)
 
         guard !Task.isCancelled else { throw DescopeError.passkeyCancelled }
@@ -28,14 +28,14 @@ final class Passkey: DescopePasskey, Route {
     @MainActor
     @available(iOS 15.0, *)
     func signIn(loginId: String, options: [SignInOptions]) async throws -> AuthenticationResponse {
-        logger(.info, "Starting passkey sign in", loginId)
+        logger.info("Starting passkey sign in", loginId)
         let (refreshJwt, loginOptions) = try options.convert()
         let startResponse = try await client.passkeySignInStart(loginId: loginId, refreshJwt: refreshJwt, options: loginOptions)
         
-        logger(.info, "Requesting assertion authorization for passkey sign in", startResponse.transactionId)
+        logger.info("Requesting assertion authorization for passkey sign in", startResponse.transactionId)
         let assertionResponse = try await performAssertion(options: startResponse.options)
 
-        logger(.info, "Finishing passkey sign in", startResponse.transactionId)
+        logger.info("Finishing passkey sign in", startResponse.transactionId)
         let jwtResponse = try await client.passkeySignInFinish(transactionId: startResponse.transactionId, response: assertionResponse)
         
         guard !Task.isCancelled else { throw DescopeError.passkeyCancelled }
@@ -45,20 +45,20 @@ final class Passkey: DescopePasskey, Route {
     @MainActor
     @available(iOS 15.0, *)
     func signUpOrIn(loginId: String, options: [SignInOptions]) async throws -> AuthenticationResponse {
-        logger(.info, "Starting passkey sign up or in", loginId)
+        logger.info("Starting passkey sign up or in", loginId)
         let (refreshJwt, loginOptions) = try options.convert()
         let startResponse = try await client.passkeySignUpInStart(loginId: loginId, refreshJwt: refreshJwt, options: loginOptions)
         
         let jwtResponse: DescopeClient.JWTResponse
         if startResponse.create {
-            logger(.info, "Requesting register authorization for passkey sign up or in", startResponse.transactionId)
+            logger.info("Requesting register authorization for passkey sign up or in", startResponse.transactionId)
             let registerResponse = try await performRegister(options: startResponse.options)
-            logger(.info, "Finishing passkey sign up", startResponse.transactionId)
+            logger.info("Finishing passkey sign up", startResponse.transactionId)
             jwtResponse = try await client.passkeySignUpFinish(transactionId: startResponse.transactionId, response: registerResponse)
         } else {
-            logger(.info, "Requesting assertion authorization for passkey sign up or in", startResponse.transactionId)
+            logger.info("Requesting assertion authorization for passkey sign up or in", startResponse.transactionId)
             let assertionResponse = try await performAssertion(options: startResponse.options)
-            logger(.info, "Finishing passkey sign in", startResponse.transactionId)
+            logger.info("Finishing passkey sign in", startResponse.transactionId)
             jwtResponse = try await client.passkeySignInFinish(transactionId: startResponse.transactionId, response: assertionResponse)
         }
         
@@ -69,13 +69,13 @@ final class Passkey: DescopePasskey, Route {
     @MainActor
     @available(iOS 15.0, *)
     func add(loginId: String, refreshJwt: String) async throws {
-        logger(.info, "Starting passkey update", loginId)
+        logger.info("Starting passkey update", loginId)
         let startResponse = try await client.passkeyAddStart(loginId: loginId, refreshJwt: refreshJwt)
         
-        logger(.info, "Requesting register authorization for passkey update", startResponse.transactionId)
+        logger.info("Requesting register authorization for passkey update", startResponse.transactionId)
         let registerResponse = try await performRegister(options: startResponse.options)
         
-        logger(.info, "Finishing passkey update", startResponse.transactionId)
+        logger.info("Finishing passkey update", startResponse.transactionId)
         try await client.passkeyAddFinish(transactionId: startResponse.transactionId, response: registerResponse)
     }
 
@@ -145,16 +145,16 @@ final class Passkey: DescopePasskey, Route {
 
         switch result {
         case .failure(ASAuthorizationError.canceled):
-            logger(.info, "Passkey authorization cancelled")
+            logger.info("Passkey authorization cancelled")
             throw DescopeError.passkeyCancelled
         case .failure(let error as NSError) where error.domain == "WKErrorDomain" && error.code == 31:
-            logger(.error, "Passkey authorization timed out", error)
+            logger.error("Passkey authorization timed out", error)
             throw DescopeError.passkeyCancelled.with(message: "The operation timed out")
         case .failure(let error):
-            logger(.error, "Passkey authorization failed", error)
+            logger.error("Passkey authorization failed", error)
             throw DescopeError.passkeyFailed.with(cause: error)
         case .success(let authorization):
-            logger(.debug, "Processing passkey authorization", authorization)
+            logger.debug("Processing passkey authorization", authorization)
             return authorization
         }
     }
