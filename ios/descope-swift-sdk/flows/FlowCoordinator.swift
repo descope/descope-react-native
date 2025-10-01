@@ -63,6 +63,7 @@ public class DescopeFlowCoordinator {
         didSet {
             sdk.resume = resumeClosure
             logger = sdk.config.logger
+            bridge.flow = flow
             bridge.logger = logger
         }
     }
@@ -110,25 +111,18 @@ public class DescopeFlowCoordinator {
     /// The ``delegate`` property should be set before calling this function to ensure
     /// no delegate updates are missed.
     public func start(flow: DescopeFlow) {
-        #if DEBUG && !canImport(React)
-        precondition(webView != nil, "The flow coordinator's webView property must be set before starting the flow")
-        precondition(sdk.config.projectId != "", "The Descope singleton must be setup or an instance of DescopeSDK must be set on the flow")
+        self.flow = flow
+
+        #if !canImport(React)
+        if sdk.config.projectId.isEmpty {
+            logger.error("The Descope singleton must be setup or an instance of DescopeSDK must be set on the flow")
+        }
         #endif
 
-        logger(.info, "Starting flow authentication", flow)
-        self.flow = flow
+        logger.info("Starting flow authentication", flow)
         handleStarted()
 
-        loadURL(flow.url)
-    }
-
-    private func loadURL(_ url: String) {
-        let url = URL(string: url) ?? URL(string: "invalid://")!
-        var request = URLRequest(url: url)
-        if let timeout = flow?.requestTimeoutInterval {
-            request.timeoutInterval = timeout
-        }
-        webView?.load(request)
+        bridge.start()
     }
 
     private var sdk: DescopeSDK {
@@ -201,25 +195,49 @@ public class DescopeFlowCoordinator {
 
     private func ensureState(_ states: DescopeFlowState...) -> Bool {
         guard states.contains(state) else {
-            logger(.error, "Unexpected flow state", state, states)
+            logger.error("Unexpected flow state", state, states)
             return false
         }
         return true
     }
 
     private func sendResponse(_ response: FlowBridgeResponse) {
-        guard ensureState(.ready) else { return }
-        bridge.send(response: response)
+        guard ensureState(.started, .ready) else { return } // we get here in started state if the flow has no screens
+        bridge.postResponse(response)
+    }
+
+    // Session
+
+    private var sessionTimer: Timer?
+
+    private func startSessionTimer() {
+        sessionTimer?.invalidate()
+        sessionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+            guard let coordinator = self else { return timer.invalidate() }
+            Task { @MainActor in
+                coordinator.updateRefreshJwt()
+            }
+        }
+    }
+
+    private func stopSessionTimer() {
+        sessionTimer?.invalidate()
+        sessionTimer = nil
+    }
+
+    private func updateRefreshJwt() {
+        guard let session = flow?.providedSession else { return }
+        bridge.updateRefreshJwt(session.refreshJwt)
     }
 
     // Resume
 
     private func resume(_ url: URL) -> Bool {
         guard state == .ready else {
-            logger(.debug, "Ignoring resume URL", state)
+            logger.debug("Ignoring resume URL", state)
             return false
         }
-        logger(.info, "Received URL for resuming flow", url)
+        logger.info("Received URL for resuming flow", url)
         sendResponse(.magicLink(url: url.absoluteString))
         return true
     }
@@ -248,14 +266,14 @@ public class DescopeFlowCoordinator {
 
     private func handleReady() {
         guard ensureState(.started) else { return }
-        bridge.set(oauthProvider: flow?.oauthNativeProvider?.name, magicLinkRedirect: flow?.magicLinkRedirect)
         state = .ready
         executeHooks(event: .ready)
+        startSessionTimer() // XXX session won't be updated if the flow doesn't have any screens
         delegate?.coordinatorDidBecomeReady(self)
     }
 
     private func handleRequest(_ request: FlowBridgeRequest) {
-        guard ensureState(.ready) else { return }
+        guard ensureState(.started, .ready) else { return } // we get here in started state if the flow has no screens
         switch request {
         case let .oauthNative(clientId, stateId, nonce, implicit):
             handleOAuthNative(clientId: clientId, stateId: stateId, nonce: nonce, implicit: implicit)
@@ -272,20 +290,30 @@ public class DescopeFlowCoordinator {
         // keep its own state to ensure it only reports a single failure
         guard state != .failed  else { return }
 
+        logger.error("Flow failed with \(error.code) error", error)
+
         state = .failed
+        stopSessionTimer()
         delegate?.coordinatorDidFail(self, error: error)
     }
 
     private func handleSuccess(_ authResponse: AuthenticationResponse) {
-        guard ensureState(.ready) else { return }
+        guard ensureState(.started, .ready) else { return } // we get here in started state if the flow has no screens
+
+        logger.info("Flow finished successfully")
+        if logger.isUnsafeEnabled, let data = try? JSONEncoder().encode(authResponse), let value = String(bytes: data, encoding: .utf8) {
+            logger.debug("Received flow response", value)
+        }
+
         state = .finished
+        stopSessionTimer()
         delegate?.coordinatorDidFinish(self, response: authResponse)
     }
 
     // Authentication
 
     private func handleAuthentication(_ data: Data) {
-        logger(.info, "Finishing flow authentication")
+        logger.info("Finishing flow authentication")
         Task {
             guard let authResponse = await parseAuthentication(data) else { return }
             handleSuccess(authResponse)
@@ -295,13 +323,13 @@ public class DescopeFlowCoordinator {
     private func parseAuthentication(_ data: Data) async -> AuthenticationResponse? {
         do {
             guard let webView else { return nil }
-            let cookies = await webView.configuration.websiteDataStore.httpCookieStore.cookies(for: webView.url)
             var jwtResponse = try JSONDecoder().decode(DescopeClient.JWTResponse.self, from: data)
-            try jwtResponse.setValues(from: data, cookies: cookies)
+            let cookies = await webView.configuration.websiteDataStore.httpCookieStore.cookies(for: jwtResponse.cookieDomain, at: webView.url)
+            try jwtResponse.setValues(from: data, cookies: cookies, refreshCookieName: bridge.attributes.refreshCookieName)
             return try jwtResponse.convert()
         } catch {
-            logger(.error, "Unexpected error handling authentication response", error)
-            handleError(DescopeError.flowFailed.with(message: "No valid authentication tokens found"))
+            logger.error("Unexpected error parsing authentication response", error, String(bytes: data, encoding: .utf8))
+            handleError(DescopeError.flowFailed.with(message: "No valid authentication response found"))
             return nil
         }
     }
@@ -309,7 +337,7 @@ public class DescopeFlowCoordinator {
     // OAuth Native
 
     private func handleOAuthNative(clientId: String, stateId: String, nonce: String, implicit: Bool) {
-        logger(.info, "Requesting authentication using Sign in with Apple", clientId)
+        logger.info("Requesting authentication using Sign in with Apple", clientId)
         Task {
             await performOAuthNative(stateId: stateId, nonce: nonce, implicit: implicit)
         }
@@ -329,7 +357,7 @@ public class DescopeFlowCoordinator {
     // OAuth / SSO
 
     private func handleWebAuth(variant: String, startURL: URL, finishURL: URL?) {
-        logger(.info, "Requesting web authentication", startURL)
+        logger.info("Requesting web authentication", startURL)
         Task {
             await performWebAuth(variant: variant, startURL: startURL, finishURL: finishURL)
         }
@@ -376,19 +404,31 @@ extension DescopeFlowCoordinator: FlowBridgeDelegate {
         handleError(error)
     }
 
-    func bridgeDidFinishAuthentication(_ bridge: FlowBridge, data: Data) {
-        handleAuthentication(data)
+    func bridgeDidFinish(_ bridge: FlowBridge, data: Data?) {
+        if let data {
+            handleAuthentication(data)
+        } else if let session = flow?.providedSession {
+            handleSuccess(AuthenticationResponse(sessionToken: session.sessionToken, refreshToken: session.refreshToken, user: session.user, isFirstAuthentication: false))
+        } else {
+            logger.error("Couldn't find session to finish flow", flow?.sessionProvider == nil ? "nil provider" : "custom provider")
+            handleError(DescopeError.flowFailed.with(message: "No valid authentication tokens found"))
+        }
     }
 }
 
 private extension WKHTTPCookieStore {
-    func cookies(for url: URL?) async -> [HTTPCookie] {
+    func cookies(for domain: String?, at url: URL?) async -> [HTTPCookie] {
         return await allCookies().filter { cookie in
-            guard let domain = url?.host else { return true }
-            if cookie.domain.hasPrefix(".") {
-                return domain.hasSuffix(cookie.domain) || domain == cookie.domain.dropFirst()
+            // prefer finding value cookies compared to the cookie domain if it's specified,
+            // but allow falling back to comparing against the page URL
+            for value in [domain, url?.host] {
+                guard let value, !value.isEmpty else { continue }
+                if cookie.domain.hasPrefix(".") {
+                    return value.hasSuffix(cookie.domain) || value == cookie.domain.dropFirst()
+                }
+                return value == cookie.domain
             }
-            return domain == cookie.domain
+            return true
         }
     }
 }

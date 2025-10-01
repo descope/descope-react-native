@@ -9,13 +9,13 @@ final class OAuth: DescopeOAuth, Route {
     }
 
     func web(provider: OAuthProvider, accessSharedUserData: Bool, options: [SignInOptions]) async throws -> AuthenticationResponse {
-        logger(.info, "Starting OAuth web authentication")
+        logger.info("Starting OAuth web authentication")
         let url = try await webStart(provider: provider, redirectURL: WebAuth.redirectURL, options: options)
 
-        logger(.info, "Showing OAuth web authentication", url)
+        logger.info("Showing OAuth web authentication", url)
         let code = try await WebAuth.performAuthentication(url: url, accessSharedUserData: accessSharedUserData, logger: logger)
 
-        logger(.info, "Finishing OAuth web authentication")
+        logger.info("Finishing OAuth web authentication")
         return try await webExchange(code: code)
     }
 
@@ -31,14 +31,14 @@ final class OAuth: DescopeOAuth, Route {
     }
 
     func native(provider: OAuthProvider, options: [SignInOptions]) async throws -> AuthenticationResponse {
-        logger(.info, "Starting authentication using Sign in with Apple")
+        logger.info("Starting authentication using Sign in with Apple")
         let (refreshJwt, loginOptions) = try options.convert()
         let startResponse = try await client.oauthNativeStart(provider: provider, refreshJwt: refreshJwt, options: loginOptions)
 
-        logger(.info, "Requesting authorization for Sign in with Apple", startResponse.clientId)
+        logger.info("Requesting authorization for Sign in with Apple", startResponse.clientId)
         let (authorizationCode, identityToken, user) = try await OAuth.performNativeAuthentication(nonce: startResponse.nonce, implicit: startResponse.implicit, logger: logger)
 
-        logger(.info, "Finishing authentication using Sign in with Apple")
+        logger.info("Finishing authentication using Sign in with Apple")
         return try await client.oauthNativeFinish(provider: provider, stateId: startResponse.stateId, user: user, authorizationCode: authorizationCode, identityToken: identityToken).convert()
     }
 
@@ -66,7 +66,7 @@ private func presentNativeAuthentication(nonce: String, logger: DescopeLogger?) 
     // now that we have a reference to the ASAuthorizationController object we setup
     // a cancellation handler to be invoked if the async task is cancelled
     let cancellation = { @MainActor [weak authController] in
-        logger(.info, "OAuth native authentication cancelled programmatically")
+        logger.info("OAuth native authentication cancelled programmatically")
         guard #available(iOS 16.0, macOS 13, *) else { return }
         authController?.cancel()
     }
@@ -89,33 +89,33 @@ private func presentNativeAuthentication(nonce: String, logger: DescopeLogger?) 
 
     switch result {
     case .failure(ASAuthorizationError.canceled):
-        logger(.info, "OAuth native authentication cancelled by user")
+        logger.info("OAuth native authentication cancelled by user")
         throw DescopeError.oauthNativeCancelled
     case .failure(ASAuthorizationError.unknown):
-        logger(.info, "OAuth native authentication aborted")
+        logger.info("OAuth native authentication aborted")
         throw DescopeError.oauthNativeCancelled.with(message: "The operation was aborted")
     case .failure(let error):
-        logger(.error, "OAuth native authentication failed", error)
+        logger.error("OAuth native authentication failed", error)
         throw DescopeError.oauthNativeFailed.with(cause: error)
     case .success(let authorization):
-        logger(.debug, "Processing OAuth native authentication", authorization)
+        logger.debug("Processing OAuth native authentication", authorization)
         return authorization
     }
 }
 
 private func parseCredential(_ credential: ASAuthorizationCredential, implicit: Bool, logger: DescopeLogger?) throws(DescopeError) -> (authorizationCode: String?, identityToken: String?, user: String?) {
     guard let credential = credential as? ASAuthorizationAppleIDCredential else { throw DescopeError.oauthNativeFailed.with(message: "Invalid Apple credential type") }
-    logger(.debug, "Received Apple credential", credential.realUserStatus)
+    logger.debug("Received Apple credential", credential.realUserStatus)
 
     var authorizationCode: String?
     if !implicit, let data = credential.authorizationCode, let value = String(bytes: data, encoding: .utf8) {
-        logger(.debug, "Adding authorization code from Apple credential", value)
+        logger.debug("Adding authorization code from Apple credential", value)
         authorizationCode = value
     }
 
     var identityToken: String?
     if implicit, let data = credential.identityToken, let value = String(bytes: data, encoding: .utf8) {
-        logger(.debug, "Adding identity token from Apple credential", value)
+        logger.debug("Adding identity token from Apple credential", value)
         identityToken = value
     }
 
@@ -133,7 +133,7 @@ private func parseCredential(_ credential: ASAuthorizationCredential, implicit: 
         }
         let object = ["name": name]
         if let data = try? JSONSerialization.data(withJSONObject: object), let value = String(bytes: data, encoding: .utf8) {
-            logger(.debug, "Adding user name from Apple credential", name)
+            logger.debug("Adding user name from Apple credential", name)
             user = value
         }
     }

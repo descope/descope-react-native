@@ -47,7 +47,7 @@ public protocol DescopeFlowViewDelegate: AnyObject {
 ///
 /// You can use a flow view as the main view of a modal authentication screen or as part of a
 /// more complex view hierarchy. In the former case you might consider using a ``DescopeFlowViewController``
-/// instead, as it provides simple way to present an authentication flow modally.
+/// instead, as it provides a simpler way to present an authentication flow modally.
 ///
 /// You can create an instance of ``DescopeFlowView``, add it to the view hierarchy, and call
 /// ``start(flow:)`` to load the flow.
@@ -102,7 +102,7 @@ public protocol DescopeFlowViewDelegate: AnyObject {
 ///     the various `UIKit` properties on the view itself and the various CSS rules in
 ///     the flow webpage being displayed. If you need any additional customization
 ///     options that are not currently exposed by ``DescopeFlowView`` you can open
-///     an issue or pull request [here](https://github.com/descope/swift-sdk).
+///     an issue or pull request [here](https://github.com/descope/descope-swift).
 open class DescopeFlowView: UIView {
 
     /// A delegate object for receiving events about the state of the flow.

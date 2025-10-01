@@ -65,15 +65,6 @@ extension DescopeClient.JWTResponse {
         guard let user else { throw DescopeError.decodeError.with(message: "Missing user details") }
         return try AuthenticationResponse(sessionToken: Token(jwt: sessionJwt), refreshToken: Token(jwt: refreshJwt), user: user.convert(), isFirstAuthentication: firstSeen)
     }
-    
-    func convert() throws -> RefreshResponse {
-        guard let sessionJwt, !sessionJwt.isEmpty else { throw DescopeError.decodeError.with(message: "Missing session JWT") }
-        var refreshToken: DescopeToken?
-        if let refreshJwt, !refreshJwt.isEmpty {
-            refreshToken = try Token(jwt: refreshJwt)
-        }
-        return try RefreshResponse(sessionToken: Token(jwt: sessionJwt), refreshToken: refreshToken)
-    }
 }
 
 extension DescopeClient.MaskedAddress {

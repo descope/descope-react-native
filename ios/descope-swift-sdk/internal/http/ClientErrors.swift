@@ -45,7 +45,7 @@ enum HTTPError: Error {
     case unauthorized
     case forbidden
     case serverFailure(Int)
-    case serverUnreachable
+    case serverUnreachable(Int)
 }
 
 extension HTTPError {
@@ -56,8 +56,8 @@ extension HTTPError {
         case 401: self = .unauthorized
         case 403: self = .forbidden
         case 404: self = .notFound
-        case 500, 503: self = .serverFailure(statusCode)
-        case 500...: self = .serverUnreachable
+        case 500, 501, 503: self = .serverFailure(statusCode)
+        case 500...: self = .serverUnreachable(statusCode)
         default: self = .unexpectedResponse(statusCode)
         }
     }
@@ -74,7 +74,7 @@ extension HTTPError: CustomStringConvertible {
         case .unauthorized: return "The request was unauthorized"
         case .forbidden: return "The request was forbidden"
         case .serverFailure(let code): return "The server failed with status code \(code)"
-        case .serverUnreachable: return "The server was unreachable"
+        case .serverUnreachable(let code): return "The server was unreachable with status code \(code)"
         }
     }
 }

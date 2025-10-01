@@ -143,15 +143,15 @@ public extension DescopeSDK {
     static let name = "DescopeKit"
     
     /// The Descope SDK version
-    static let version = "0.9.13"
+    static let version = "0.9.19"
 }
 
 // Internal
 
 private extension DescopeSessionManager {
     convenience init(sdk: DescopeSDK) {
-        let storage = SessionStorage(projectId: sdk.config.projectId)
-        let lifecycle = SessionLifecycle(auth: sdk.auth, storage: storage, logger: sdk.config.logger)
+        let storage = SessionStorage(projectId: sdk.config.projectId, store: .keychain)
+        let lifecycle = SessionLifecycle(auth: sdk.auth, config: sdk.config)
         self.init(storage: storage, lifecycle: lifecycle)
     }
 }

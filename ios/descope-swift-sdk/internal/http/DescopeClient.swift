@@ -402,6 +402,12 @@ final class DescopeClient: HTTPClient, @unchecked Sendable {
         return try await post("auth/refresh", headers: authorization(with: refreshJwt))
     }
     
+    func migrate(externalToken: String) async throws -> JWTResponse {
+        return try await post("auth/refresh", body: [
+            "externalToken": externalToken,
+        ])
+    }
+    
     func logout(type: RevokeType, refreshJwt: String) async throws {
         switch type {
         case .currentSession:
@@ -421,17 +427,18 @@ final class DescopeClient: HTTPClient, @unchecked Sendable {
         var refreshJwt: String?
         var user: UserResponse?
         var firstSeen: Bool
+        var cookieDomain: String?
         
         mutating func setValues(from data: Data, response: HTTPURLResponse) throws {
             guard let url = response.url, let fields = response.allHeaderFields as? [String: String] else { return }
             let cookies = HTTPCookie.cookies(withResponseHeaderFields: fields, for: url)
-            try setValues(from: data, cookies: cookies)
+            try setValues(from: data, cookies: cookies, refreshCookieName: nil)
         }
 
         // The UserResponse decoding takes care of all fields except customAttributes,
         // and we also extract JWTs from the response or webpage cookies if the project
         // is configured to not return them in the response
-        mutating func setValues(from data: Data, cookies: [HTTPCookie]) throws {
+        mutating func setValues(from data: Data, cookies: [HTTPCookie], refreshCookieName: String?) throws {
             let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
             if let dict = json["user"] as? [String: Any] {
                 user?.setCustomAttributes(from: dict)
@@ -440,7 +447,7 @@ final class DescopeClient: HTTPClient, @unchecked Sendable {
                 sessionJwt = findTokenCookie(named: sessionCookieName, in: cookies)
             }
             if refreshJwt == nil || refreshJwt == "" {
-                refreshJwt = findTokenCookie(named: refreshCookieName, in: cookies)
+                refreshJwt = findTokenCookie(named: refreshCookieName ?? DescopeClient.refreshCookieName, in: cookies)
             }
         }
     }
@@ -533,14 +540,27 @@ final class DescopeClient: HTTPClient, @unchecked Sendable {
     }
     
     override var defaultHeaders: [String: String] {
-        return [
+        var headers = [
             "Authorization": "Bearer \(config.projectId)",
             "x-descope-sdk-name": "swift",
             "x-descope-sdk-version": DescopeSDK.version,
+            "x-descope-platform-name": SystemInfo.osName,
+            "x-descope-platform-version": SystemInfo.osVersion,
+            "x-descope-project-id": config.projectId,
         ]
+        if let appName = SystemInfo.appName, !appName.isEmpty {
+            headers["x-descope-app-name"] = appName
+        }
+        if let appVersion = SystemInfo.appVersion, !appVersion.isEmpty {
+            headers["x-descope-app-version"] = appVersion
+        }
+        if let device = SystemInfo.device, !device.isEmpty {
+            headers["x-descope-device"] = device
+        }
+        return headers
     }
     
-    override func errorForResponseData(_ data: Data) -> Error? {
+    override func errorForResponseData(_ data: Data) -> DescopeError? {
         return DescopeError(errorResponse: data)
     }
     

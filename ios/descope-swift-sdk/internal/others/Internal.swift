@@ -19,9 +19,64 @@ extension DescopeError {
     }
 }
 
+extension DescopeLogger {
+    class ConsoleLogger: DescopeLogger, @unchecked Sendable {
+        static let basic = ConsoleLogger(level: .info, unsafe: false)
+
+        static let debug = ConsoleLogger(level: .debug, unsafe: isDebuggerAttached())
+
+        static let unsafe = ConsoleLogger(level: .debug, unsafe: true)
+
+        override func output(level: Level, message: String, unsafe values: [Any]) {
+            var text = "[\(DescopeSDK.name)] \(message)"
+            if !values.isEmpty {
+                text += " (" + values.map { String(describing: $0) }.joined(separator: ", ") + ")"
+            }
+            print(text)
+        }
+
+        private static func isDebuggerAttached() -> Bool {
+            var mib = [CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()]
+            var result = kinfo_proc()
+            var size = MemoryLayout.size(ofValue: result)
+            guard sysctl(&mib, UInt32(mib.count), &result, &size, nil, 0) == EXIT_SUCCESS else { return false }
+            return result.kp_proc.p_flag & P_TRACED != 0
+        }
+    }
+}
+
 extension DescopeLogger? {
-    func callAsFunction(_ level: DescopeLogger.Level, _ message: StaticString, _ values: Any?...) {
-        self?.log(level, message, values)
+    var isUnsafeEnabled: Bool {
+        return self?.unsafe == true
+    }
+
+    func error(_ message: String, _ values: Any?...) {
+        self?.log(.error, message, values)
+    }
+
+    func info(_ message: String, _ values: Any?...) {
+        self?.log(.info, message, values)
+    }
+
+    func debug(_ message: String, _ values: Any?...) {
+        self?.log(.debug, message, values)
+    }
+}
+
+extension DescopeFlow {
+    @MainActor
+    var providedSession: DescopeSession? {
+        // if there's a non-nil provider always use its value, no matter if the value is nil or not
+        if let provider = sessionProvider {
+            return provider()
+        }
+        // only take the session from the manager if it's not expired, in case the app is running
+        // a login flow and it didn't clear the previous session from its manager by mistake
+        let sdk = descope ?? Descope.sdk
+        if let session = sdk.sessionManager.session, !session.refreshToken.isExpired {
+            return session
+        }
+        return nil
     }
 }
 
@@ -107,7 +162,6 @@ class AuthorizationDelegate: NSObject, ASAuthorizationControllerDelegate {
     }
 }
 
-#if os(iOS) && canImport(React)
 extension AuthenticationResponse: Codable {
     enum CodingKeys: String, CodingKey {
         case sessionToken = "sessionJwt"
@@ -132,4 +186,3 @@ extension AuthenticationResponse: Codable {
         try values.encode(isFirstAuthentication, forKey: .isFirstAuthentication)
     }
 }
-#endif
