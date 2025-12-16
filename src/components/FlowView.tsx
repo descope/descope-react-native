@@ -1,12 +1,14 @@
+import type { JWTResponse } from '@descope/core-js-sdk'
 import React, { useCallback, type SyntheticEvent } from 'react'
 import { requireNativeComponent, type HostComponent, type ViewStyle } from 'react-native'
+import { version } from '../../package.json'
 import type { DescopeError, FlowOptions } from '../types'
-import type { JWTResponse } from '@descope/core-js-sdk'
 
 type DescopeFlowView = {
   onFlowReady?: () => void
   onFlowSuccess?: (event: SyntheticEvent<never, { response: string }>) => void
   onFlowError?: (event: SyntheticEvent<never, { errorCode: string; errorDescription: string; errorMessage?: string }>) => void
+  flowOptions?: FlowOptions & { sdkVersion?: string }
 }
 
 const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostComponent<DescopeFlowView>
@@ -91,5 +93,6 @@ export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: s
     },
     [onError],
   )
-  return <DescopeFlowView {...props} onFlowReady={onReady} onFlowSuccess={onSuccessHook} onFlowError={onErrorHook} />
+
+  return <DescopeFlowView {...props} onFlowReady={onReady} onFlowSuccess={onSuccessHook} onFlowError={onErrorHook} flowOptions={{ ...props.flowOptions, sdkVersion: version }} />
 }

@@ -30,6 +30,7 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
     
     @objc func setFlowOptions(_ options: NSDictionary) {
         guard let url = options["url"] as? String else { return }
+        guard let sdkVersion = options["sdkVersion"] as? String else { return }
         let descopeFlow = DescopeFlow(url: url)
         if let oauthNativeProvder = options["iosOAuthNativeProvider"] as? String {
             descopeFlow.oauthNativeProvider = OAuthProvider(stringLiteral: oauthNativeProvder)
@@ -37,8 +38,13 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
         if let magicLinkRedirect = options["magicLinkRedirect"] as? String {
             descopeFlow.magicLinkRedirect = magicLinkRedirect
         }
-        
-        start(flow: DescopeFlow(url: url))
+        descopeFlow.hooks = [
+            .runJavaScript(on: .loaded, code: """
+                window.descopeBridge.hostInfo.sdkName = 'reactnative'
+                window.descopeBridge.hostInfo.sdkVersion = '\(sdkVersion)'
+            """),
+        ]
+        start(flow: descopeFlow)
     }
     
     @objc var onFlowReady: RCTBubblingEventBlock?

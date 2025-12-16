@@ -4,7 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import com.descope.android.DescopeFlow
+import com.descope.android.DescopeFlowHook
 import com.descope.android.DescopeFlowView
+import com.descope.android.runJavaScript
 import com.descope.types.AuthenticationResponse
 import com.descope.types.DescopeException
 import com.descope.types.DescopeUser
@@ -59,6 +61,7 @@ class DescopeFlowViewManager() : SimpleViewManager<DescopeFlowView>(), DescopeFl
   fun setFlowOptions(descopeFlowView: DescopeFlowView, options: ReadableMap?) {
     if (options == null) return
     val url = options.getString("url") ?: return
+    val sdkVersion = options.getString("sdkVersion") ?: return
     val descopeFlow = DescopeFlow(url)
     options.getString("androidOAuthNativeProvider")?.run { descopeFlow.oauthNativeProvider = OAuthProvider(name = this) }
     descopeFlow.oauthRedirect = options.getString("oauthRedirect")
@@ -66,6 +69,13 @@ class DescopeFlowViewManager() : SimpleViewManager<DescopeFlowView>(), DescopeFl
     descopeFlow.ssoRedirect = options.getString("ssoRedirect")
     descopeFlow.ssoRedirectCustomScheme = options.getString("ssoRedirectCustomScheme")
     descopeFlow.magicLinkRedirect = options.getString("magicLinkRedirect")
+    descopeFlow.hooks = listOf(
+            runJavaScript(DescopeFlowHook.Event.Loaded, """
+                window.descopeBridge.hostInfo.sdkName = 'reactnative'
+                window.descopeBridge.hostInfo.sdkVersion = '$sdkVersion'
+            """),
+        )
+
 
     this.descopeFlowView = descopeFlowView
     descopeFlowView.listener = this
