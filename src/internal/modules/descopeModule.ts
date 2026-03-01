@@ -13,5 +13,6 @@ interface DescopeNative {
   loadItem(key: string): Promise<string>
   saveItem(key: string, value: string): Promise<string>
   removeItem(key: string): Promise<string>
+  configureLogging(level: string, unsafe: boolean): Promise<void>
 }
 export default DescopeReactNative as DescopeNative

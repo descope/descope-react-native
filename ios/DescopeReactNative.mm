@@ -1,6 +1,7 @@
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 
-@interface RCT_EXTERN_MODULE(DescopeReactNative, NSObject)
+@interface RCT_EXTERN_MODULE(DescopeReactNative, RCTEventEmitter)
 
 RCT_EXTERN_METHOD(prepFlow:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
@@ -30,10 +31,9 @@ RCT_EXTERN_METHOD(removeItem:(NSString *)key
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
-
-+ (BOOL)requiresMainQueueSetup
-{
-  return NO;
-}
+RCT_EXTERN_METHOD(configureLogging:(NSString *)level
+                 unsafe:(BOOL)unsafe
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
 
 @end
