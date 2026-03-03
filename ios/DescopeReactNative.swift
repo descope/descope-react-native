@@ -7,13 +7,52 @@ private let redirectURL = "\(redirectScheme)://flow"
 private let maxKeyWindowAttempts = 10
 
 @objc(DescopeReactNative)
-class DescopeReactNative: NSObject {
+class DescopeReactNative: RCTEventEmitter {
 
     private let keychainStore = KeychainStore()
     private let defaultContextProvider = DefaultContextProvider()
     private var sessions: [ASWebAuthenticationSession] = []
     private var resolve: RCTPromiseResolveBlock?
     private var reject: RCTPromiseRejectBlock?
+    fileprivate var hasListeners = false
+
+    // Event Emitter
+
+    override func supportedEvents() -> [String] {
+        return ["descopeLog"]
+    }
+
+    override static func requiresMainQueueSetup() -> Bool {
+        return false
+    }
+
+    override func startObserving() {
+        hasListeners = true
+    }
+
+    override func stopObserving() {
+        hasListeners = false
+    }
+
+    // Logging
+
+    @objc(configureLogging:unsafe:resolver:rejecter:)
+    func configureLogging(_ level: String, unsafe: Bool, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        let logLevel: DescopeLogger.Level
+        switch level {
+        case "error": logLevel = .error
+        case "info": logLevel = .info
+        default: logLevel = .debug
+        }
+
+        let logger = ReactNativeDescopeLogger(emitter: self, level: logLevel, unsafe: unsafe)
+        DispatchQueue.main.async {
+            Descope.setup(projectId: "") { config in
+                config.logger = logger
+            }
+            resolve(nil)
+        }
+    }
 
     // Flow
 
@@ -122,6 +161,37 @@ class DescopeReactNative: NSObject {
         guard !key.isEmpty else { return reject("missing_key", "'key' is required for removeItem", nil) }
         keychainStore.removeItem(key: key)
         resolve(key)
+    }
+}
+
+// Logger
+
+private class ReactNativeDescopeLogger: DescopeLogger, @unchecked Sendable {
+    private weak var emitter: DescopeReactNative?
+
+    init(emitter: DescopeReactNative, level: Level, unsafe: Bool) {
+        self.emitter = emitter
+        super.init(level: level, unsafe: unsafe)
+    }
+
+    override func output(level: Level, message: String, unsafe values: [Any]) {
+        let levelString: String
+        switch level {
+        case .error: levelString = "error"
+        case .info: levelString = "info"
+        case .debug: levelString = "debug"
+        }
+
+        let valuesArray = values.map { String(describing: $0) }
+
+        DispatchQueue.main.async { [weak self] in
+            guard let emitter = self?.emitter, emitter.hasListeners else { return }
+            emitter.sendEvent(withName: "descopeLog", body: [
+                "level": levelString,
+                "message": message,
+                "values": valuesArray,
+            ])
+        }
     }
 }
 

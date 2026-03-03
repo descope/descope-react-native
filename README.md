@@ -48,6 +48,27 @@ const AppRoot = () => {
 }
 ```
 
+## Logging
+
+You can configure the SDK to emit log messages by providing a logger to `AuthProvider`:
+
+```js
+const logger = {
+  log: (message) => MyMonitoringService.info(message),
+  debug: (message) => MyMonitoringService.debug(message),
+  warn: (message) => MyMonitoringService.warn(message),
+  error: (message) => MyMonitoringService.error(message),
+}
+
+<AuthProvider projectId="my-project-id" logger={logger}>
+  <App />
+</AuthProvider>
+```
+
+The `logger` prop accepts any object that implements `log`, `debug`, `warn`, and `error` methods, making it easy to hook up to any monitoring or observability service. During development you can pass `console` directly for quick debugging.
+
+The logger receives messages from both the JavaScript layer and the native SDK layer (iOS/Android), so all SDK activity — including flow execution and network calls — will be captured.
+
 ## Session Management
 
 The `useSession` hook is used to manage an authenticated user session for an application.

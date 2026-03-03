@@ -3,15 +3,20 @@ package com.descopereactnative
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import com.descope.Descope
+import com.descope.sdk.DescopeLogger
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.modules.core.DeviceEventManagerModule
 import java.security.MessageDigest
 import kotlin.random.Random
 import androidx.core.net.toUri
@@ -26,6 +31,22 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
 
   override fun getName(): String {
     return NAME
+  }
+
+  // Logging
+
+  @ReactMethod
+  fun configureLogging(level: String, unsafe: Boolean, promise: Promise) {
+    val logLevel = when (level) {
+      "error" -> DescopeLogger.Level.Error
+      "info" -> DescopeLogger.Level.Info
+      else -> DescopeLogger.Level.Debug
+    }
+    val logger = ReactNativeDescopeLogger(reactContext, logLevel, unsafe)
+    Descope.setup(reactContext, projectId = "") {
+      this.logger = logger
+    }
+    promise.resolve(null)
   }
 
   // Flow
@@ -106,6 +127,38 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
 
   companion object {
     const val NAME = "DescopeReactNative"
+  }
+}
+
+private class ReactNativeDescopeLogger(
+  private val reactContext: ReactApplicationContext,
+  level: Level,
+  unsafe: Boolean
+) : DescopeLogger(level, unsafe) {
+  private val handler = Handler(Looper.getMainLooper())
+
+  override fun output(level: Level, message: String, values: List<Any>) {
+    val levelString = when (level) {
+      Level.Error -> "error"
+      Level.Info -> "info"
+      Level.Debug -> "debug"
+    }
+
+    val valuesArray = Arguments.createArray().apply {
+      values.forEach { pushString(it.toString()) }
+    }
+
+    val body = Arguments.createMap().apply {
+      putString("level", levelString)
+      putString("message", message)
+      putArray("values", valuesArray)
+    }
+
+    handler.post {
+      reactContext
+        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+        .emit("descopeLog", body)
+    }
   }
 }
 

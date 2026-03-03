@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState, type FC } from 'react'
 import { createSdk, type SdkConfig } from '../internal/core/sdk'
 import Context from '../internal/hooks/Context'
 import DescopeReactNative from '../internal/modules/descopeModule'
+import { setupNativeLogBridge } from '../internal/modules/nativeLogBridge'
 import type { DescopeSession } from '../types'
 import { setCurrentTokens, setCurrentUser } from '../helpers'
 
@@ -13,6 +14,12 @@ const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, children }
   const sdk = useMemo(() => {
     return createSdk({ projectId, baseUrl, logger, fetch })
   }, [projectId, baseUrl, logger, fetch])
+
+  // set up native log bridge when logger is provided
+  useEffect(() => {
+    if (!logger) return
+    return setupNativeLogBridge(logger)
+  }, [logger])
 
   // clear session if the sdk changes
   useEffect(() => {
