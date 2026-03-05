@@ -12,7 +12,7 @@ import useDescopeContext from '../internal/hooks/useContext'
 export default function useHostedFlowUrl(flowId: string): string {
   const { sdk, projectId } = useDescopeContext()
   if (!sdk) {
-    throw new Error('useHostedFlowUrl must be used within a DescopeProvider')
+    throw new Error('useHostedFlowUrl must be used within an <AuthProvider />')
   }
   return sdk.httpClient.buildUrl(`login/${projectId}`, { platform: 'mobile', wide: 'true', flow: flowId })
 }

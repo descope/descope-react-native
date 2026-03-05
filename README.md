@@ -288,7 +288,7 @@ The `FlowOptions` defines all of the options available when running a flow on bo
 Android and iOS. Read the component documentation for a detailed explanation.
 
 ```js
-import { FlowView, useHostedFlowUrl } from '@descope/react-native-sdk'
+import { FlowView, useHostedFlowUrl, useSession } from '@descope/react-native-sdk'
 
 const { manageSession } = useSession()
 
