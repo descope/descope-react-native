@@ -2,6 +2,7 @@ export { default as AuthProvider } from './components/AuthProvider'
 export { default as FlowView } from './components/FlowView'
 export { default as useDescope } from './hooks/useDescope'
 export { default as useSession } from './hooks/useSession'
+export { default as useHostedFlowUrl } from './hooks/useHostedFlowUrl'
 
 // deprecated
 export { default as useFlow } from './hooks/useFlow'
