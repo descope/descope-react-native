@@ -428,7 +428,9 @@ final class DescopeClient: HTTPClient, @unchecked Sendable {
         var user: UserResponse?
         var firstSeen: Bool
         var cookieDomain: String?
-        
+        var cookieName: String?
+        var sessionCookieName: String?
+
         mutating func setValues(from data: Data, response: HTTPURLResponse) throws {
             guard let url = response.url, let fields = response.allHeaderFields as? [String: String] else { return }
             let cookies = HTTPCookie.cookies(withResponseHeaderFields: fields, for: url)
@@ -444,10 +446,12 @@ final class DescopeClient: HTTPClient, @unchecked Sendable {
                 user?.setCustomAttributes(from: dict)
             }
             if sessionJwt == nil || sessionJwt == "" {
-                sessionJwt = findTokenCookie(named: sessionCookieName, in: cookies)
+                let name = (sessionCookieName == "" ? nil : sessionCookieName) ?? DescopeClient.sessionCookieName
+                sessionJwt = findTokenCookie(named: name, in: cookies)
             }
             if refreshJwt == nil || refreshJwt == "" {
-                refreshJwt = findTokenCookie(named: refreshCookieName ?? DescopeClient.refreshCookieName, in: cookies)
+                let name = (cookieName == "" ? nil : cookieName) ?? refreshCookieName ?? DescopeClient.refreshCookieName
+                refreshJwt = findTokenCookie(named: name, in: cookies)
             }
         }
     }
