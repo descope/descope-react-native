@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "DescopeExpoExample",
+    "slug": "descope-expo-example",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.descope.reactnative.expoexample"
+    },
+    "android": {
+      "package": "com.descope.reactnative.expoexample"
+    },
+    "plugins": ["expo-dev-client", "./plugins/fix-fmt-consteval.js"]
+  }
+}

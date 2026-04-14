@@ -13,7 +13,7 @@ const compat = new FlatCompat({
 })
 export default [
   {
-    ignores: ['node_modules/', 'lib/'],
+    ignores: ['**/node_modules/', 'lib/'],
   },
   ...fixupConfigRules(compat.extends('@react-native-community', 'prettier')),
 ]

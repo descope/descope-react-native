@@ -21,11 +21,13 @@ export const createSdk = (...config: SdkConfig) => {
 
 const parseCookies = async (mutableResponse: ExtendedResponse) => {
   const resp = await mutableResponse.json()
-  if (mutableResponse.cookies.DS) {
-    resp.sessionJwt = mutableResponse.cookies.DS
+  const sessionName = resp.sessionCookieName || 'DS'
+  const refreshName = resp.cookieName || 'DSR'
+  if (mutableResponse.cookies[sessionName]) {
+    resp.sessionJwt = mutableResponse.cookies[sessionName]
   }
-  if (mutableResponse.cookies.DSR) {
-    resp.refreshJwt = mutableResponse.cookies.DSR
+  if (mutableResponse.cookies[refreshName]) {
+    resp.refreshJwt = mutableResponse.cookies[refreshName]
   }
   return mutableResponse
 }

@@ -43,10 +43,12 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
       else -> DescopeLogger.Level.Debug
     }
     val logger = ReactNativeDescopeLogger(reactContext, logLevel, unsafe)
-    Descope.setup(reactContext, projectId = "") {
-      this.logger = logger
+    Handler(Looper.getMainLooper()).post {
+      Descope.setup(reactContext, projectId = "") {
+        this.logger = logger
+      }
+      promise.resolve(null)
     }
-    promise.resolve(null)
   }
 
   // Flow
