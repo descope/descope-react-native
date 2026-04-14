@@ -1,6 +1,6 @@
 # Descope React Native SDK — Expo Example
 
-An Expo variant of the example app. Used to demonstraight how the SDK works in Expo projects (via a custom development build — **not** Expo Go).
+An Expo variant of the example app. Used to demonstrate how the SDK works in Expo projects (via a custom development build — **not** Expo Go).
 
 ## Why a dev build?
 

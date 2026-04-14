@@ -21,7 +21,7 @@ The SDK is developed and tested against the versions listed below. Older version
 
 **Expo:** Expo is supported, however because the library ships native code, it requires a [custom development build](https://docs.expo.dev/develop/development-builds/introduction/) or the bare workflow — Expo Go is a pre-built app and thus will not work.
 
-**XCode 26+:** New versions of XCode may cause an `fmt` compatibility issue with Xcode 26's clang and affects any React Native app — not this SDK specifically. It's fixed upstream in React Native `0.84+` which ships a newer `fmt`. If you're on an earlier version, you'll need to patch your iOS build. See the [troublshooting section](#fixing-xcode-26-compatiblity-issues) for detailed patching steps.
+**XCode 26+:** New versions of XCode may cause an `fmt` compatibility issue with Xcode 26's clang and affects any React Native app — not this SDK specifically. It's fixed upstream in React Native `0.84+` which ships a newer `fmt`. If you're on an earlier version, you'll need to patch your iOS build. See the [troubleshooting section](#fixing-xcode-26-compatibility-issues) for detailed patching steps.
 
 ## Requirements
 
@@ -377,7 +377,7 @@ const App = () => {
 
 ## Troubleshooting
 
-### Fixing XCode 26+ Compatiblity Issues
+### Fixing XCode 26+ Compatibility Issues
 
 **Standard React Native project** — add this to `ios/Podfile` inside `post_install`:
 
