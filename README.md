@@ -2,7 +2,26 @@
 
 The Descope SDK for React Native provides convenient access to Descope for an application written on top of React Native. You can read more on the [Descope Website](https://descope.com).
 
-> Our React Native SDK doesn't currently support [Expo](https://expo.dev/). If you are using Expo, you can still use Descope by following the [Expo OIDC](https://www.descope.com/blog/post/expo-authentication) integration guide.
+## Compatibility
+
+The SDK is developed and tested against the versions listed below. Older versions may work but are not officially supported.
+
+| Requirement                 | Version                                                                          |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| React Native                | `0.78` (current release) — works on `>= 0.74` via the React Native interop layer |
+| React                       | `19.0` (shipped with React Native 0.78)                                          |
+| Node.js                     | `>= 18.18.0`                                                                     |
+| iOS deployment target       | `>= 13.0`                                                                        |
+| Xcode                       | `>= 15.0` (tested through `26.4`)                                                |
+| Android `minSdkVersion`     | `24`                                                                             |
+| Android `compileSdkVersion` | `35`                                                                             |
+| Java / Kotlin JVM target    | `17`                                                                             |
+
+**Architecture:** The library is written against the legacy bridge architecture. On apps using React Native's New Architecture (default since `0.76`), the library is transparently wrapped by the interop layer — no host configuration required. Migration to the newer architecture is roadmapped.
+
+**Expo:** Expo is supported, however because the library ships native code, it requires a [custom development build](https://docs.expo.dev/develop/development-builds/introduction/) or the bare workflow — Expo Go is a pre-built app and thus will not work.
+
+**XCode 26+:** New versions of XCode may cause an `fmt` compatibility issue with Xcode 26's clang and affects any React Native app — not this SDK specifically. It's fixed upstream in React Native `0.84+` which ships a newer `fmt`. If you're on an earlier version, you'll need to patch your iOS build. See the [troublshooting section](#fixing-xcode-26-compatiblity-issues) for detailed patching steps.
 
 ## Requirements
 
@@ -23,8 +42,6 @@ When targeting iOS, make sure to navigate into the `ios` folder and install the 
 ```bash
 pod install
 ```
-
-**NOTE:** The Android native code is compiled using Kotlin v2.2.0 and Gradle plugin v8.13
 
 ## Usage
 
@@ -357,6 +374,72 @@ const App = () => {
 ```
 
 **For more SDK usage examples refer to [docs](https://docs.descope.com/build/guides/client_sdks/)**
+
+## Troubleshooting
+
+### Fixing XCode 26+ Compatiblity Issues
+
+**Standard React Native project** — add this to `ios/Podfile` inside `post_install`:
+
+```ruby
+post_install do |installer|
+  # ...existing post_install code...
+
+  # Workaround for fmt consteval errors with Xcode 26+
+  # Remove once React Native ships fmt >= 12.1.0
+  fmt_base = File.join(installer.sandbox.pod_dir('fmt'), 'include', 'fmt', 'base.h')
+  if File.exist?(fmt_base)
+    content = File.read(fmt_base)
+    patched = content.gsub(/#  define FMT_USE_CONSTEVAL 1/, '#  define FMT_USE_CONSTEVAL 0')
+    File.write(fmt_base, patched)
+  end
+end
+```
+
+**Expo project** — because Expo regenerates the `Podfile` on every `prebuild`, use a config plugin. Create `plugins/fix-fmt-consteval.js`:
+
+```js
+const { withDangerousMod } = require('expo/config-plugins')
+const fs = require('fs')
+const path = require('path')
+
+module.exports = function withFixFmtConsteval(config) {
+  return withDangerousMod(config, [
+    'ios',
+    async (config) => {
+      const podfilePath = path.join(config.modRequest.platformProjectRoot, 'Podfile')
+      let podfile = fs.readFileSync(podfilePath, 'utf8')
+      const marker = '# Workaround for fmt consteval errors with Xcode 26+'
+      if (podfile.includes(marker)) return config
+
+      const patch = `
+    ${marker}
+    fmt_base = File.join(installer.sandbox.pod_dir('fmt'), 'include', 'fmt', 'base.h')
+    if File.exist?(fmt_base)
+      content = File.read(fmt_base)
+      patched = content.gsub(/#  define FMT_USE_CONSTEVAL 1/, '#  define FMT_USE_CONSTEVAL 0')
+      File.write(fmt_base, patched)
+    end
+`
+      podfile = podfile.replace(/(post_install do \|installer\|)/, `$1\n${patch}`)
+      fs.writeFileSync(podfilePath, podfile)
+      return config
+    },
+  ])
+}
+```
+
+Then register it in `app.json`:
+
+```json
+{
+  "expo": {
+    "plugins": ["./plugins/fix-fmt-consteval.js"]
+  }
+}
+```
+
+Re-run `expo prebuild` (or delete `ios/` and run `expo run:ios`) and the patch will be applied.
 
 ## Learn More
 

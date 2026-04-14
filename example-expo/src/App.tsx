@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { AuthProvider, useSession } from '@descope/react-native-sdk'
-import { DESCOPE_PROJECT_ID, DESCOPE_BASE_URL } from '@env'
 import LoginScreen from './screens/LoginScreen'
 import FlowScreen from './screens/FlowScreen'
 import OtpScreen from './screens/OtpScreen'
@@ -48,7 +47,7 @@ function Main() {
 
 export default function App() {
   return (
-    <AuthProvider projectId={DESCOPE_PROJECT_ID} baseUrl={DESCOPE_BASE_URL || undefined} logger={logger}>
+    <AuthProvider projectId={process.env.EXPO_PUBLIC_DESCOPE_PROJECT_ID || ''} baseUrl={process.env.EXPO_PUBLIC_DESCOPE_BASE_URL || undefined} logger={logger}>
       <Main />
     </AuthProvider>
   )

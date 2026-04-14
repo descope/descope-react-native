@@ -40,6 +40,7 @@ project.xcworkspace
 .settings
 local.properties
 android.iml
+example/android/.kotlin
 
 # Cocoapods
 #
@@ -55,6 +56,14 @@ android.iml
 
 # Ruby
 example/vendor/
+
+# Environment
+.env
+.env.local
+
+# React Native bundle output (generated locally)
+**/android/app/src/main/assets/index.android.bundle
+**/android/app/src/main/res/drawable-mdpi/
 
 # node.js
 #

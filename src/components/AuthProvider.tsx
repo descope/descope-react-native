@@ -6,7 +6,7 @@ import { setupNativeLogBridge } from '../internal/modules/nativeLogBridge'
 import type { DescopeSession } from '../types'
 import { setCurrentTokens, setCurrentUser } from '../helpers'
 
-type Props = Pick<SdkConfig[0], 'projectId' | 'baseUrl' | 'logger' | 'fetch'> & { children?: JSX.Element }
+type Props = Pick<SdkConfig[0], 'projectId' | 'baseUrl' | 'logger' | 'fetch'> & { children?: React.ReactNode }
 const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, children }) => {
   const [session, setSession] = useState<DescopeSession>()
   const [isSessionLoading, setSessionLoading] = useState<boolean>(true)

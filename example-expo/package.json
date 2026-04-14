@@ -1,0 +1,24 @@
+{
+  "name": "descope-react-native-expo-example",
+  "version": "0.0.1",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild": "expo prebuild"
+  },
+  "dependencies": {
+    "@descope/react-native-sdk": "link:..",
+    "expo": "53.0.27",
+    "expo-dev-client": "5.2.4",
+    "react": "19.0.0",
+    "react-native": "0.79.6"
+  },
+  "devDependencies": {
+    "@babel/core": "7.29.0",
+    "@types/react": "19.0.14",
+    "typescript": "5.8.3"
+  }
+}
