@@ -1,0 +1,32 @@
+{
+  "name": "DescopeReactNativeLatestExample",
+  "version": "0.0.1",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "pods": "pod-install --quiet"
+  },
+  "dependencies": {
+    "@descope/react-native-sdk": "link:..",
+    "react": "19.2.3",
+    "react-native": "0.84.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7.26.8",
+    "@babel/preset-env": "7.26.8",
+    "@babel/runtime": "7.26.10",
+    "@react-native-community/cli": "20.1.0",
+    "@react-native-community/cli-platform-android": "20.1.0",
+    "@react-native-community/cli-platform-ios": "20.1.0",
+    "@react-native/babel-preset": "0.84.0",
+    "@react-native/metro-config": "0.84.0",
+    "babel-plugin-module-resolver": "5.0.0",
+    "react-native-dotenv": "3.4.11"
+  },
+  "engines": {
+    "node": ">=22.11.0"
+  }
+}
