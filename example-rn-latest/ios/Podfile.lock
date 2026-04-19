@@ -1,5 +1,5 @@
 PODS:
-  - descope-react-native (0.8.2):
+  - descope-react-native (0.9.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2038,7 +2038,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  descope-react-native: cee9898dc19fe68a9ec316afa2281e71d94bd5d8
+  descope-react-native: cb0be7ae646e1e59cee13b067d5715886a69f8b3
   FBLazyVector: c12d2108050e27952983d565a232f6f7b1ad5e69
   hermes-engine: c2090dcb6351f44735fc1ab5014f79761bfa8749
   RCTDeprecation: 3280799c14232a56e5a44f92981a8ee33bc69fd9
