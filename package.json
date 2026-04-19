@@ -36,7 +36,7 @@
     "example-rn-latest": "yarn --cwd example-rn-latest",
     "build:android": "cd example/android && ./gradlew assembleDebug --no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a",
     "build:ios": "cd example/ios && xcodebuild -workspace DescopeReactNativeExample.xcworkspace -scheme DescopeReactNativeExample -configuration Debug -sdk iphonesimulator COMPILER_INDEX_STORE_ENABLE=NO",
-    "bootstrap": "yarn install && yarn example && yarn example pods && yarn example-rn-latest && yarn example-rn-latest pods && yarn example-expo && cd example-expo/ios && pod install",
+    "bootstrap": "yarn install && yarn example && yarn example pods && yarn example-rn-latest && yarn example-rn-latest pods && yarn example-expo",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build",
     "update:native": "./scripts/update-kotlin-sdk.sh && ./scripts/update-swift-sdk.sh"
   },
