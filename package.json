@@ -31,12 +31,12 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src test example/src example-expo/src example-rn-latest/src",
     "prepack": "bob build",
-    "release": "release-it",
     "example": "yarn --cwd example",
+    "example-expo": "yarn --cwd example-expo",
     "example-rn-latest": "yarn --cwd example-rn-latest",
     "build:android": "cd example/android && ./gradlew assembleDebug --no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a",
     "build:ios": "cd example/ios && xcodebuild -workspace DescopeReactNativeExample.xcworkspace -scheme DescopeReactNativeExample -configuration Debug -sdk iphonesimulator COMPILER_INDEX_STORE_ENABLE=NO",
-    "bootstrap": "yarn example && yarn install && yarn example pods && yarn example-rn-latest && yarn example-rn-latest pods",
+    "bootstrap": "yarn install && yarn example && yarn example pods && yarn example-rn-latest && yarn example-rn-latest pods && yarn example-expo",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build",
     "update:native": "./scripts/update-kotlin-sdk.sh && ./scripts/update-swift-sdk.sh"
   },
@@ -66,7 +66,6 @@
     "@react-native-community/cli-platform-ios": "15.0.1",
     "@react-native-community/eslint-config": "3.2.0",
     "@react-native/babel-preset": "0.78.0",
-    "@release-it/conventional-changelog": "5.1.1",
     "@testing-library/react-native": "12.4.3",
     "@types/base-64": "1.0.2",
     "@types/jest": "29.5.14",
@@ -82,7 +81,6 @@
     "react-native": "0.78.0",
     "react-native-builder-bob": "0.20.4",
     "react-test-renderer": "19.0.0",
-    "release-it": "15.11.0",
     "turbo": "1.12.3",
     "typescript": "5.7.3"
   },
@@ -99,23 +97,6 @@
       "<rootDir>/example/node_modules",
       "<rootDir>/lib/"
     ]
-  },
-  "release-it": {
-    "git": {
-      "commitMessage": "chore: release ${version}",
-      "tagName": "v${version}"
-    },
-    "npm": {
-      "publish": true
-    },
-    "github": {
-      "release": true
-    },
-    "plugins": {
-      "@release-it/conventional-changelog": {
-        "preset": "angular"
-      }
-    }
   },
   "react-native-builder-bob": {
     "source": "src",

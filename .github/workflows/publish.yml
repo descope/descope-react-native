@@ -3,7 +3,7 @@ name: 📢 publish
 on:
   push:
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+*'
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 env:
   NODE_VERSION: 20.9.0
@@ -14,6 +14,7 @@ jobs:
     permissions:
       packages: write
       contents: read
+      id-token: write
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +32,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.CI_NPM_READ_ORG }}
 
       - name: Publish to NPM Package Registry
-        run: npm publish --access=public
+        run: npm publish --access=public --provenance
         env:
           CI: true
           NODE_AUTH_TOKEN: ${{ secrets.CI_NPM_REGISTRY }}

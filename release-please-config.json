@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "node",
+  "bootstrap-sha": "d7a510acb71f4190b0330b8ff2109de74dcc9231",
+  "include-component-in-tag": false,
+  "packages": {
+    ".": {
+      "package-name": "@descope/react-native-sdk",
+      "changelog-path": "CHANGELOG.md",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": false
+    }
+  }
+}
