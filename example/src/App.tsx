@@ -6,6 +6,7 @@ import LoginScreen from './screens/LoginScreen'
 import FlowScreen from './screens/FlowScreen'
 import OtpScreen from './screens/OtpScreen'
 import HomeScreen from './screens/HomeScreen'
+import AuthenticatedFlowScreen from './screens/AuthenticatedFlowScreen'
 
 const logger = {
   debug: (...args: any[]) => console.log('[Descope DEBUG]', ...args),
@@ -14,7 +15,7 @@ const logger = {
   error: (...args: any[]) => console.error('[Descope]', ...args),
 }
 
-type Screen = 'login' | 'flow' | 'otp'
+type Screen = 'login' | 'flow' | 'otp' | 'authflow'
 
 function Main() {
   const { session, isSessionLoading } = useSession()
@@ -33,7 +34,10 @@ function Main() {
   }
 
   if (session) {
-    return <HomeScreen />
+    if (screen === 'authflow') {
+      return <AuthenticatedFlowScreen onBack={() => setScreen('login')} />
+    }
+    return <HomeScreen onAuthenticatedFlow={() => setScreen('authflow')} />
   }
 
   switch (screen) {

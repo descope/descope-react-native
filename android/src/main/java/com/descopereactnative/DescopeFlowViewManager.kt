@@ -7,6 +7,7 @@ import com.descope.android.DescopeFlow
 import com.descope.android.DescopeFlowHook
 import com.descope.android.DescopeFlowView
 import com.descope.android.runJavaScript
+import com.descope.session.DescopeSession
 import com.descope.types.AuthenticationResponse
 import com.descope.types.DescopeException
 import com.descope.types.DescopeUser
@@ -31,6 +32,7 @@ const val REACT_CLASS = "DescopeFlowView"
 class DescopeFlowViewManager() : SimpleViewManager<DescopeFlowView>(), DescopeFlowView.Listener {
 
   private var descopeFlowView: DescopeFlowView? = null
+  private var hostSession: DescopeSession? = null
 
   override fun getName(): String = REACT_CLASS
 
@@ -75,6 +77,7 @@ class DescopeFlowViewManager() : SimpleViewManager<DescopeFlowView>(), DescopeFl
                 window.descopeBridge.hostInfo.sdkVersion = '$sdkVersion'
             """),
         )
+    descopeFlow.sessionProvider = { hostSession }
 
 
     this.descopeFlowView = descopeFlowView
@@ -85,6 +88,23 @@ class DescopeFlowViewManager() : SimpleViewManager<DescopeFlowView>(), DescopeFl
   @ReactProp(name = "deepLink")
   fun setDeepLink(descopeFlowView: DescopeFlowView, deepLink: String?) {
     deepLink?.run { descopeFlowView.resumeFromDeepLink(this.toUri()) }
+  }
+
+  @ReactProp(name = "session")
+  fun setSession(descopeFlowView: DescopeFlowView, session: ReadableMap?) {
+    val sessionJwt = session?.getString("sessionJwt")
+    val refreshJwt = session?.getString("refreshJwt")
+    if (sessionJwt.isNullOrEmpty() || refreshJwt.isNullOrEmpty()) {
+      hostSession = null
+      return
+    }
+    // User object is owned by RN layer, and is not used by the native flow.
+    // To avoid unnecessary complexity of mapping the user object to the native layer, a placeholder user is used instead.
+    hostSession = try {
+      DescopeSession(sessionJwt, refreshJwt, DescopeUser.placeholder)
+    } catch (e: Exception) {
+      null
+    }
   }
 
   // Flow Listener

@@ -1,6 +1,6 @@
-import { renderHook } from '@testing-library/react-native'
+import { render, renderHook } from '@testing-library/react-native'
 import React from 'react'
-import { AuthProvider, useFlow, useDescope, useSession, useHostedFlowUrl } from '../src'
+import { AuthProvider, FlowView, useFlow, useDescope, useSession, useHostedFlowUrl } from '../src'
 import createCoreSdk from '@descope/core-js-sdk'
 
 jest.mock('@descope/core-js-sdk', () => jest.fn())
@@ -22,6 +22,12 @@ describe('hooks', () => {
     expect(() => renderHook(useFlow)).toThrowError('You can only use this hook in the context of <AuthProvider />')
     expect(() => renderHook(useSession)).toThrowError('You can only use this hook in the context of <AuthProvider />')
     expect(() => renderHook(useDescope)).toThrowError('You can only use this hook in the context of <AuthProvider />')
+  })
+
+  it('should not allow FlowView to render outside AuthProvider', () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+    expect(() => render(React.createElement(FlowView, { flowOptions: { url: 'https://example.com/flow' } }))).toThrowError('You can only use this hook in the context of <AuthProvider />')
+    consoleError.mockRestore()
   })
 
   describe('useHostedFlowUrl', () => {

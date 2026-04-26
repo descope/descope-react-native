@@ -1,14 +1,21 @@
 import type { JWTResponse } from '@descope/core-js-sdk'
-import React, { useCallback, type SyntheticEvent } from 'react'
+import React, { useCallback, useMemo, type SyntheticEvent } from 'react'
 import { requireNativeComponent, type HostComponent, type ViewStyle } from 'react-native'
 import { version } from '../../package.json'
+import useDescopeContext from '../internal/hooks/useContext'
 import type { DescopeError, FlowOptions } from '../types'
+
+type FlowSession = {
+  sessionJwt: string
+  refreshJwt: string
+}
 
 type DescopeFlowView = {
   onFlowReady?: () => void
   onFlowSuccess?: (event: SyntheticEvent<never, { response: string }>) => void
   onFlowError?: (event: SyntheticEvent<never, { errorCode: string; errorDescription: string; errorMessage?: string }>) => void
   flowOptions?: FlowOptions & { sdkVersion?: string }
+  session?: FlowSession
 }
 
 const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostComponent<DescopeFlowView>
@@ -29,6 +36,11 @@ const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostCompone
  * to configure the desired authentication methods in the [Descope console.](https://app.descope.com/settings/authentication)
  * Some of the default configurations might be OK to start out with,
  * but it is likely that modifications will be required before release.
+ *
+ * - Authenticated Flows: When a user is logged in and an active session exists, the flow
+ * automatically runs as the authenticated user. This is required for flows that
+ * update user details, perform step-up authentication, or otherwise expect a
+ * signed-in user.
  *
  * **iOS Setup**
  *
@@ -72,14 +84,25 @@ const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostCompone
  */
 export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: string; style?: ViewStyle; onReady?: () => unknown; onSuccess?: (jwtResponse: JWTResponse) => unknown; onError?: (error: DescopeError) => unknown }) {
   const { onReady, onSuccess, onError } = props
+  const { session, isSessionLoading } = useDescopeContext()
+
+  const sessionPayload = useMemo<FlowSession | undefined>(() => (session ? { sessionJwt: session.sessionJwt, refreshJwt: session.refreshJwt } : undefined), [session])
 
   const onSuccessHook = useCallback(
     (event: SyntheticEvent<never, { response: string }>) => {
       const rawResponse = JSON.parse(event.nativeEvent.response)
       const jwtResponse = rawResponse as JWTResponse
+      // For authenticated flows - the session tokens from the current active session are used to authenticate
+      // the user inside the flow, while the user object itself is unaffected. However, since the user is an integral
+      // part of the session construct, a placeholder user is used by the native layer. When a flow finishes without
+      // issuing a new auth response (e.g. profile update), the placeholder user is replaced here with the
+      // actual user from the current active session.
+      if (jwtResponse.user && jwtResponse.user.userId === '' && session?.user) {
+        jwtResponse.user = session.user
+      }
       onSuccess?.(jwtResponse)
     },
-    [onSuccess],
+    [onSuccess, session?.user],
   )
 
   const onErrorHook = useCallback(
@@ -94,5 +117,11 @@ export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: s
     [onError],
   )
 
-  return <DescopeFlowView {...props} onFlowReady={onReady} onFlowSuccess={onSuccessHook} onFlowError={onErrorHook} flowOptions={{ ...props.flowOptions, sdkVersion: version }} />
+  // Defer mounting the native view until the persisted session has been loaded, so authenticated flows
+  // don't initialize with an empty refresh JWT on cold start.
+  if (isSessionLoading) {
+    return null
+  }
+
+  return <DescopeFlowView {...props} session={sessionPayload} onFlowReady={onReady} onFlowSuccess={onSuccessHook} onFlowError={onErrorHook} flowOptions={{ ...props.flowOptions, sdkVersion: version }} />
 }
