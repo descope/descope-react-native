@@ -32,7 +32,7 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
     
 
     @objc func setSession(_ session: NSDictionary?) {
-        guard let session, let sessionJwt = session["sessionJwt"] as? String, let refreshJwt = session["refreshJwt"] as? String else {
+        guard let session, let sessionJwt = session["sessionJwt"] as? String, let refreshJwt = session["refreshJwt"] as? String, !sessionJwt.isEmpty, !refreshJwt.isEmpty else {
             hostSession = nil
             return
         }
