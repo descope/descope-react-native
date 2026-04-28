@@ -71,6 +71,11 @@ class DescopeFlowViewManager() : SimpleViewManager<DescopeFlowView>(), DescopeFl
     descopeFlow.ssoRedirect = options.getString("ssoRedirect")
     descopeFlow.ssoRedirectCustomScheme = options.getString("ssoRedirectCustomScheme")
     descopeFlow.magicLinkRedirect = options.getString("magicLinkRedirect")
+    options.getMap("clientInputs")?.toHashMap()?.let { src ->
+      val target = HashMap<String, Any>(src.size)
+      src.forEach { (k, v) -> v?.let { target[k] = it } }
+      descopeFlow.clientInputs = target
+    }
     descopeFlow.hooks = listOf(
             runJavaScript(DescopeFlowHook.Event.Loaded, """
                 window.descopeBridge.hostInfo.sdkName = 'reactnative'

@@ -51,6 +51,9 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
         if let magicLinkRedirect = options["magicLinkRedirect"] as? String {
             descopeFlow.magicLinkRedirect = magicLinkRedirect
         }
+        if let clientInputs = options["clientInputs"] as? [String: Any] {
+            descopeFlow.clientInputs = clientInputs
+        }
         descopeFlow.hooks = [
             .runJavaScript(on: .loaded, code: """
                 window.descopeBridge.hostInfo.sdkName = 'reactnative'

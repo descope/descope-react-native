@@ -184,6 +184,13 @@ export type FlowOptions = {
    * overriding whatever is configured in the flow or project
    */
   magicLinkRedirect?: string
+  /**
+   * An optional map of client inputs that will be provided to the flow.
+   *
+   * These values can be used in the flow editor to customize the flow's behavior
+   * during execution. The values must be valid JSON types.
+   */
+  clientInputs?: Record<string, unknown>
 }
 
 // Deprecated
