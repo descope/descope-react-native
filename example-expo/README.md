@@ -23,7 +23,10 @@ Expo Go is a pre-built sandbox app that can only load pure-JS modules. Since thi
    EXPO_PUBLIC_DESCOPE_PROJECT_ID=your_project_id
    EXPO_PUBLIC_DESCOPE_BASE_URL=
    EXPO_PUBLIC_DESCOPE_FLOW_ID=sign-up-or-in
+   EXPO_PUBLIC_DESCOPE_AUTHENTICATED_FLOW_ID=update-user-details
    ```
+
+   `EXPO_PUBLIC_DESCOPE_AUTHENTICATED_FLOW_ID` should point to a flow that expects the user to already be signed in (e.g., updating profile details, step-up, MFA enrollment).
 
 ## Running
 

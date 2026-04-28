@@ -18,7 +18,10 @@ A minimal React Native app demonstrating integration with the Descope SDK. Used 
    DESCOPE_PROJECT_ID=your_project_id
    DESCOPE_BASE_URL=
    DESCOPE_FLOW_ID=sign-up-or-in
+   DESCOPE_AUTHENTICATED_FLOW_ID=update-user-details
    ```
+
+   `DESCOPE_AUTHENTICATED_FLOW_ID` should point to a flow that expects the user to already be signed in (e.g., updating profile details, step-up, MFA enrollment).
 
 ## Running
 
@@ -56,4 +59,5 @@ yarn start
 - **Login** — Two buttons: "Sign in with Flow" and "Sign in with OTP"
 - **Flow** — Renders `FlowView` against the configured flow
 - **OTP** — Two-step email OTP: send code, then verify
-- **Home** — Shows user info and a logout button (only visible when a session exists)
+- **Home** — Shows user info, a button to run an authenticated flow, and a logout button (only visible when a session exists)
+- **Authenticated Flow** — Renders `FlowView` against the configured authenticated flow; runs as the signed-in user via the active session

@@ -4,7 +4,11 @@ import { useDescope, useSession } from '@descope/react-native-sdk'
 import Button from '../ui/Button'
 import { theme } from '../ui/theme'
 
-export default function HomeScreen() {
+type Props = {
+  onAuthenticatedFlow: () => void
+}
+
+export default function HomeScreen({ onAuthenticatedFlow }: Props) {
   const sdk = useDescope()
   const { session, clearSession } = useSession()
 
@@ -22,7 +26,10 @@ export default function HomeScreen() {
         <Text style={styles.email}>{user?.loginIds?.[0]}</Text>
         {user?.name ? <Text style={styles.name}>{user.name}</Text> : null}
       </View>
-      <Button title="Log Out" onPress={logout} variant="secondary" />
+      <View style={styles.buttons}>
+        <Button title="Run authenticated flow" onPress={onAuthenticatedFlow} />
+        <Button title="Log Out" onPress={logout} variant="secondary" />
+      </View>
     </View>
   )
 }
@@ -52,5 +59,8 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.subtitle,
     color: theme.colors.muted,
     marginTop: theme.spacing.sm,
+  },
+  buttons: {
+    gap: theme.spacing.md,
   },
 })

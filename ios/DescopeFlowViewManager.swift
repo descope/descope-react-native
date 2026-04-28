@@ -17,6 +17,8 @@ class DescopeFlowViewManager: RCTViewManager {
 
 class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
     
+    private var hostSession: DescopeSession?
+
     func setup() {
         delegate = self
     }
@@ -28,6 +30,17 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
         Descope.handleURL(url)
     }
     
+
+    @objc func setSession(_ session: NSDictionary?) {
+        guard let session, let sessionJwt = session["sessionJwt"] as? String, let refreshJwt = session["refreshJwt"] as? String, !sessionJwt.isEmpty, !refreshJwt.isEmpty else {
+            hostSession = nil
+            return
+        }
+        // User object is owned by RN layer, and is not used by the native flow.
+        // To avoid unnecessary complexity of mapping the user object to the native layer, a placeholder user is used instead.
+        hostSession = try? DescopeSession(sessionJwt: sessionJwt, refreshJwt: refreshJwt, user: .placeholder)
+    }
+
     @objc func setFlowOptions(_ options: NSDictionary) {
         guard let url = options["url"] as? String else { return }
         guard let sdkVersion = options["sdkVersion"] as? String else { return }
@@ -47,6 +60,7 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
                 window.descopeBridge.hostInfo.sdkVersion = '\(sdkVersion)'
             """),
         ]
+        descopeFlow.sessionProvider = { [weak self] in self?.hostSession }
         start(flow: descopeFlow)
     }
     
