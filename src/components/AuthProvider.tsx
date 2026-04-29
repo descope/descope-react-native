@@ -1,15 +1,24 @@
-import React, { useEffect, useMemo, useState, type FC } from 'react'
+import React, { useEffect, useMemo, useRef, useState, type FC } from 'react'
 import { createSdk, type SdkConfig } from '../internal/core/sdk'
 import Context from '../internal/hooks/Context'
 import DescopeReactNative from '../internal/modules/descopeModule'
 import { setupNativeLogBridge } from '../internal/modules/nativeLogBridge'
+import useSessionAutoRefresh from '../internal/session/useSessionAutoRefresh'
 import type { DescopeSession } from '../types'
 import { setCurrentTokens, setCurrentUser } from '../helpers'
 
-type Props = Pick<SdkConfig[0], 'projectId' | 'baseUrl' | 'logger' | 'fetch'> & { children?: React.ReactNode }
-const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, children }) => {
+type Props = Pick<SdkConfig[0], 'projectId' | 'baseUrl' | 'logger' | 'fetch'> & {
+  /**
+   * Disables the background auto-refresh of the active session. Defaults to
+   * `false`. When `true`, refresh only happens via `refreshSessionIfAboutToExpire`.
+   */
+  disableAutoRefresh?: boolean
+  children?: React.ReactNode
+}
+const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, disableAutoRefresh, children }) => {
   const [session, setSession] = useState<DescopeSession>()
   const [isSessionLoading, setSessionLoading] = useState<boolean>(true)
+  const inFlightRefresh = useRef<boolean>(false)
 
   const sdk = useMemo(() => {
     return createSdk({ projectId, baseUrl, logger, fetch })
@@ -53,6 +62,16 @@ const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, children }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId])
 
+  useSessionAutoRefresh({
+    sdk,
+    session,
+    setSession,
+    projectId,
+    logger,
+    inFlightRefresh,
+    disabled: disableAutoRefresh,
+  })
+
   const context = useMemo(
     () => ({
       sdk: sdk,
@@ -61,6 +80,7 @@ const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, children }
       session,
       setSession,
       isSessionLoading,
+      inFlightRefresh,
     }),
     [sdk, logger, projectId, session, setSession, isSessionLoading],
   )

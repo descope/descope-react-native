@@ -3,14 +3,12 @@ import type { JWTResponse, UserResponse } from '@descope/core-js-sdk'
 import useContext from '../internal/hooks/useContext'
 import DescopeReactNative from '../internal/modules/descopeModule'
 import type { DescopeSession, DescopeSessionManager } from '../types'
-import { tokenExpirationWithinThreshold } from '../internal/core/token'
+import { millisecondsUntilExpiration, performRefresh, REFRESH_THRESHOLD_MS } from '../internal/session/autoRefresh'
+import { persistSession } from '../internal/session/persist'
 import { clearCurrentSession, setCurrentTokens, setCurrentUser } from '../helpers'
 
-// The amount of time (ms) to trigger the refresh before session expires
-const REFRESH_THRESHOLD = 60 * 1000 // 1 minute
-
 const useSession = (): DescopeSessionManager => {
-  const { sdk, logger, projectId, session, setSession, isSessionLoading } = useContext()
+  const { sdk, logger, projectId, session, setSession, isSessionLoading, inFlightRefresh } = useContext()
   if (!sdk) throw new Error('This hook requires the AuthProvider component to be initialized with a project ID')
 
   // when the sdk initializes, we want the return value of "isSessionLoading" to be true immediately
@@ -33,9 +31,7 @@ const useSession = (): DescopeSessionManager => {
       refreshJwt: jwtResponse.refreshJwt,
       user: jwtResponse.user,
     }
-    await DescopeReactNative.saveItem(projectId, JSON.stringify(updatedSession))
-    setCurrentTokens(updatedSession.sessionJwt, updatedSession.refreshJwt)
-    setCurrentUser(updatedSession.user)
+    await persistSession(projectId, updatedSession)
     setSession(updatedSession)
   }
 
@@ -69,29 +65,39 @@ const useSession = (): DescopeSessionManager => {
   }
 
   const refreshSessionIfAboutToExpire = async () => {
-    if (!session || session.refreshJwt === '') {
-      logger?.warn("can't refresh session without a valid refresh token")
+    if (!session) {
+      logger?.log("can't refresh session - no active session")
       return session
     }
-    if (tokenExpirationWithinThreshold(session.sessionJwt, REFRESH_THRESHOLD)) {
+    if (!session.refreshJwt) {
+      logger?.log("can't refresh session - no refresh JWT")
+      return session
+    }
+    if (millisecondsUntilExpiration(session.sessionJwt) > REFRESH_THRESHOLD_MS) {
       logger?.log('session is valid')
       return session
     }
-    logger?.log('session JWT about to expire, refreshing...')
-    const resp = await sdk.refresh(session.refreshJwt)
-    if (resp.data) {
-      const { sessionJwt, refreshJwt } = resp.data
-      const updatedSession = {
-        sessionJwt,
-        refreshJwt: refreshJwt || session.refreshJwt,
-        user: session.user,
-      }
-      await DescopeReactNative.saveItem(projectId, JSON.stringify(updatedSession))
-      setCurrentTokens(updatedSession.sessionJwt, updatedSession.refreshJwt)
-      setSession(updatedSession)
-      return updatedSession
+    if (inFlightRefresh.current) {
+      logger?.log('a refresh is already in flight, returning current session')
+      return session
     }
-    return session
+    inFlightRefresh.current = true
+    try {
+      const result = await performRefresh(sdk, session, () => true, logger)
+      if (result.kind === 'fresh') {
+        try {
+          await persistSession(projectId, result.session)
+        } catch (e) {
+          logger?.error('failed to persist refreshed session', e as Error)
+        }
+        setSession(result.session)
+        logger?.log('manual refresh succeeded')
+        return result.session
+      }
+      return session
+    } finally {
+      inFlightRefresh.current = false
+    }
   }
 
   return { session, manageSession, refreshSessionIfAboutToExpire, clearSession, updateTokens, updateUser, isSessionLoading: isLoading.current }

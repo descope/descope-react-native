@@ -37,7 +37,7 @@ describe('hooks', () => {
 
   describe('FlowView', () => {
     const renderWithContext = (overrides: Partial<DescopeContext>) => {
-      const value: DescopeContext = { projectId, setSession: () => {}, isSessionLoading: false, ...overrides }
+      const value: DescopeContext = { projectId, setSession: () => {}, isSessionLoading: false, inFlightRefresh: { current: false }, ...overrides }
       const ctxWrapper = ({ children }: { children: React.ReactNode }) => React.createElement(Context.Provider, { value }, children)
       return render(React.createElement(FlowView, { flowOptions: { url: 'https://example.com/flow' } }), { wrapper: ctxWrapper })
     }
