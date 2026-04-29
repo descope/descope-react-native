@@ -19,6 +19,11 @@ jest.mock('../src/internal/modules/descopeModule', () => ({
   },
 }))
 
+// avoid bringing up NativeEventEmitter against the mocked native module
+jest.mock('../src/internal/modules/nativeLogBridge', () => ({
+  setupNativeLogBridge: jest.fn(() => () => {}),
+}))
+
 const NOW = 1_700_000_000_000
 const PROJECT = 'Pproject1234567890'
 
@@ -343,5 +348,42 @@ describe('useSessionAutoRefresh (via AuthProvider)', () => {
     })
 
     expect(probe.manager!.session?.sessionJwt).toBe(sessionBJwt)
+  })
+
+  it('does not recreate the SDK when logger or fetch prop identity changes', async () => {
+    const refresh = jest.fn()
+    ;(createCoreSdk as unknown as jest.Mock).mockClear()
+    ;(createCoreSdk as unknown as jest.Mock).mockReturnValue({ refresh })
+    ;(DescopeReactNative.loadItem as jest.Mock).mockResolvedValue(null)
+
+    const makeLogger = () => ({ log: () => {}, debug: () => {}, warn: () => {}, error: () => {} })
+    const makeFetch = () => () => Promise.resolve(new Response())
+
+    let renderer!: ReturnType<typeof TestRenderer.create>
+    await act(async () => {
+      renderer = TestRenderer.create(
+        <AuthProvider projectId={PROJECT} logger={makeLogger()} fetch={makeFetch() as unknown as typeof fetch}>
+          {null}
+        </AuthProvider>,
+      )
+      await Promise.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    expect(createCoreSdk).toHaveBeenCalledTimes(1)
+
+    // re-render with brand-new logger and fetch literals
+    await act(async () => {
+      renderer.update(
+        <AuthProvider projectId={PROJECT} logger={makeLogger()} fetch={makeFetch() as unknown as typeof fetch}>
+          {null}
+        </AuthProvider>,
+      )
+      await Promise.resolve()
+    })
+
+    // SDK should not have been recreated despite the new prop identities
+    expect(createCoreSdk).toHaveBeenCalledTimes(1)
   })
 })
