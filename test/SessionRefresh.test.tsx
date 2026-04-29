@@ -336,6 +336,10 @@ describe('useSessionAutoRefresh (via AuthProvider)', () => {
     })
     expect(probe.manager!.session?.sessionJwt).toBe(sessionBJwt)
 
+    // saveItem was called once by manageSession with B's tokens
+    const saveCallsBeforeResolve = (DescopeReactNative.saveItem as jest.Mock).mock.calls.length
+    expect(saveCallsBeforeResolve).toBe(1)
+
     // resolve the now-stale refresh of A, result should be discarded
     await act(async () => {
       resolveRefresh!({
@@ -348,6 +352,8 @@ describe('useSessionAutoRefresh (via AuthProvider)', () => {
     })
 
     expect(probe.manager!.session?.sessionJwt).toBe(sessionBJwt)
+    // stale auto-refresh must not have written A's tokens to storage or globals
+    expect(DescopeReactNative.saveItem).toHaveBeenCalledTimes(saveCallsBeforeResolve)
   })
 
   it('does not recreate the SDK when logger or fetch prop identity changes', async () => {

@@ -11,4 +11,6 @@ export interface DescopeContext {
   isSessionLoading: boolean
   // shared mutex between manual and background refresh
   inFlightRefresh: RefObject<boolean>
+  // tracks the latest committed session so async paths can detect mid-flight replacement
+  sessionRef: RefObject<DescopeSession | undefined>
 }

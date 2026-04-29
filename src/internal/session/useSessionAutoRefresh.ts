@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from 'react'
+import { useEffect, type RefObject } from 'react'
 import { AppState, type AppStateStatus, type NativeEventSubscription } from 'react-native'
 import type { DescopeSession } from '../../types'
 import type { Sdk, SdkLogger } from '../core/sdk'
@@ -12,6 +12,7 @@ type Args = {
   projectId: string
   logger?: SdkLogger
   inFlightRefresh: RefObject<boolean>
+  sessionRef: RefObject<DescopeSession | undefined>
   disabled?: boolean
 }
 
@@ -20,13 +21,7 @@ type Args = {
  * keyed off the current session JWT's expiration, paused on background and
  * re-armed on foreground.
  */
-const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, inFlightRefresh, disabled }: Args): void => {
-  // latest session, used to detect mid-flight replacement during a refresh await
-  const sessionRef = useRef(session)
-  useEffect(() => {
-    sessionRef.current = session
-  }, [session])
-
+const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, inFlightRefresh, sessionRef, disabled }: Args): void => {
   useEffect(() => {
     if (disabled || !sdk || !session) return undefined
     if (isTokenExpired(session.refreshJwt)) {
@@ -47,15 +42,24 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, in
     const handleResult = async (result: RefreshAttempt) => {
       switch (result.kind) {
         case 'fresh': {
+          // re-check after performRefresh's await: a manageSession or clearSession
+          // could have replaced the active session between performRefresh's internal
+          // isStillCurrent check and us getting here
+          if (cancelled || sessionRef.current !== session) {
+            logger?.debug('discarding refresh result, active session changed mid-flight')
+            return
+          }
           try {
             await persistSession(projectId, result.session)
           } catch (e) {
             logger?.error('failed to persist refreshed session', e as Error)
           }
-          if (!cancelled && sessionRef.current === session) {
-            logger?.log('auto-refresh succeeded')
-            setSession(result.session)
+          if (cancelled || sessionRef.current !== session) {
+            logger?.debug('discarding refresh result, active session changed during persist')
+            return
           }
+          logger?.log('auto-refresh succeeded')
+          setSession(result.session)
           return
         }
         case 'transient':
@@ -82,7 +86,9 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, in
         return
       }
       if (inFlightRefresh.current) {
-        logger?.debug('auto-refresh tick skipped, a refresh is already in flight')
+        // a manual refresh holds the mutex; reschedule so we don't go silent if it fails
+        logger?.debug(`auto-refresh tick skipped, a refresh is already in flight, retrying in ${TRANSIENT_BACKOFF_MS}ms`)
+        schedule(TRANSIENT_BACKOFF_MS)
         return
       }
       const captured = sessionRef.current

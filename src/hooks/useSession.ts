@@ -8,7 +8,7 @@ import { persistSession } from '../internal/session/persist'
 import { clearCurrentSession, setCurrentTokens, setCurrentUser } from '../helpers'
 
 const useSession = (): DescopeSessionManager => {
-  const { sdk, logger, projectId, session, setSession, isSessionLoading, inFlightRefresh } = useContext()
+  const { sdk, logger, projectId, session, setSession, isSessionLoading, inFlightRefresh, sessionRef } = useContext()
   if (!sdk) throw new Error('This hook requires the AuthProvider component to be initialized with a project ID')
 
   // when the sdk initializes, we want the return value of "isSessionLoading" to be true immediately
@@ -81,14 +81,23 @@ const useSession = (): DescopeSessionManager => {
       logger?.log('a refresh is already in flight, returning current session')
       return session
     }
+    const captured = session
     inFlightRefresh.current = true
     try {
-      const result = await performRefresh(sdk, session, () => true, logger)
+      const result = await performRefresh(sdk, captured, () => sessionRef.current === captured, logger)
       if (result.kind === 'fresh') {
+        if (sessionRef.current !== captured) {
+          logger?.log('discarding manual refresh result, active session changed mid-flight')
+          return sessionRef.current
+        }
         try {
           await persistSession(projectId, result.session)
         } catch (e) {
           logger?.error('failed to persist refreshed session', e as Error)
+        }
+        if (sessionRef.current !== captured) {
+          logger?.log('discarding manual refresh result, active session changed during persist')
+          return sessionRef.current
         }
         setSession(result.session)
         logger?.log('manual refresh succeeded')
