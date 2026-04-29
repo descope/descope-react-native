@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/descope/descope-react-native/compare/v0.10.0...v0.10.1) (2026-04-29)
+
+
+### Bug Fixes
+
+* Update Android SDK to 0.18.2 to include token decode fix among other changes ([#168](https://github.com/descope/descope-react-native/issues/168)) ([89cd945](https://github.com/descope/descope-react-native/commit/89cd945a55a12dfdfc781529639cb66ffeafe3e7))
+
 ## [0.10.0](https://github.com/descope/descope-react-native/compare/0.9.0...v0.10.0) (2026-04-28)
 
 
