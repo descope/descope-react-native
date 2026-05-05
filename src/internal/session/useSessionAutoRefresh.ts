@@ -20,14 +20,6 @@ const isTokenExpired = (token: string): boolean => {
   return exp ? exp.getTime() <= Date.now() : false
 }
 
-const computeRefreshDelay = (sessionJwt: string): number | null => {
-  const exp = getTokenExpiration(sessionJwt)
-  if (!exp) return null
-  const delay = exp.getTime() - Date.now() - REFRESH_THRESHOLD_MS
-  if (delay <= 0) return 0
-  return Math.min(delay, MAX_TIMEOUT_MS)
-}
-
 type Args = {
   sdk?: Sdk
   session?: DescopeSession
@@ -61,11 +53,9 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, di
     }
 
     const start = () => {
-      const delay = computeRefreshDelay(session.sessionJwt)
-      if (delay === null) {
-        logger?.log('could not determine session expiration, not scheduling auto-refresh')
-        return
-      }
+      const exp = getTokenExpiration(session.sessionJwt)
+      if (!exp) return
+      const delay = Math.min(MAX_TIMEOUT_MS, Math.max(0, exp.getTime() - Date.now() - REFRESH_THRESHOLD_MS))
       stop()
       if (delay === 0) {
         refresh()
