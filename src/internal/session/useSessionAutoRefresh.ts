@@ -70,8 +70,12 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, di
         return
       }
       stop()
-      logger?.debug(`scheduling auto-refresh in ${delay}ms`)
-      timer = setTimeout(refresh, delay)
+      if (delay === 0) {
+        refresh()
+      } else {
+        logger?.debug(`scheduling auto-refresh in ${delay}ms`)
+        timer = setTimeout(refresh, delay)
+      }
     }
 
     if (AppState.currentState === 'active') start()
