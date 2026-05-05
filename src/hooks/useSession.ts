@@ -4,7 +4,6 @@ import useContext from '../internal/hooks/useContext'
 import DescopeReactNative from '../internal/modules/descopeModule'
 import type { DescopeSession, DescopeSessionManager } from '../types'
 import { millisecondsUntilExpiration, REFRESH_THRESHOLD_MS } from '../internal/session/autoRefresh'
-import { persistSession } from '../internal/session/persist'
 import { clearCurrentSession, setCurrentTokens, setCurrentUser } from '../helpers'
 
 const useSession = (): DescopeSessionManager => {
@@ -31,7 +30,9 @@ const useSession = (): DescopeSessionManager => {
       refreshJwt: jwtResponse.refreshJwt,
       user: jwtResponse.user,
     }
-    await persistSession(projectId, updatedSession)
+    await DescopeReactNative.saveItem(projectId, JSON.stringify(updatedSession))
+    setCurrentTokens(updatedSession.sessionJwt, updatedSession.refreshJwt)
+    setCurrentUser(updatedSession.user)
     setSession(updatedSession)
   }
 
@@ -81,7 +82,8 @@ const useSession = (): DescopeSessionManager => {
         sessionJwt: resp.data.sessionJwt,
         refreshJwt: resp.data.refreshJwt || session.refreshJwt,
       }
-      await persistSession(projectId, updated)
+      await DescopeReactNative.saveItem(projectId, JSON.stringify(updated))
+      setCurrentTokens(updated.sessionJwt, updated.refreshJwt)
       setSession(updated)
       return updated
     }

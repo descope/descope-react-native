@@ -2,8 +2,9 @@ import { useEffect } from 'react'
 import { AppState, type AppStateStatus, type NativeEventSubscription } from 'react-native'
 import type { DescopeSession } from '../../types'
 import type { Sdk, SdkLogger } from '../core/sdk'
+import { setCurrentTokens } from '../../helpers'
+import DescopeReactNative from '../modules/descopeModule'
 import { computeRefreshDelay, isTokenExpired, TRANSIENT_BACKOFF_MS } from './autoRefresh'
-import { persistSession } from './persist'
 
 type Args = {
   sdk?: Sdk
@@ -49,8 +50,9 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, di
             sessionJwt: resp.data.sessionJwt,
             refreshJwt: resp.data.refreshJwt || session.refreshJwt,
           }
-          await persistSession(projectId, updated)
+          await DescopeReactNative.saveItem(projectId, JSON.stringify(updated))
           if (cancelled) return
+          setCurrentTokens(updated.sessionJwt, updated.refreshJwt)
           setSession(updated)
           logger?.log('auto-refresh succeeded')
         } else {
