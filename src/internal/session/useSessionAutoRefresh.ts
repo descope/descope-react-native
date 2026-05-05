@@ -44,6 +44,7 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, di
 
     let timer: ReturnType<typeof setTimeout> | null = null
     let cancelled = false
+    let stopped = false
 
     const stop = () => {
       if (timer !== null) {
@@ -53,6 +54,7 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, di
     }
 
     const start = () => {
+      if (stopped) return
       const exp = getTokenExpiration(session.sessionJwt)
       if (!exp) return
       const delay = Math.min(MAX_TIMEOUT_MS, Math.max(0, exp.getTime() - Date.now() - REFRESH_THRESHOLD_MS))
@@ -83,7 +85,8 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, di
           setSession(updated)
           logger?.log('auto-refresh succeeded')
         } else {
-          logger?.error('refresh rejected by server: ' + (resp.error?.errorCode ?? 'unknown'))
+          stopped = true
+          logger?.error('auto-refresh stopped, server rejected refresh: ' + (resp.error?.errorCode ?? 'unknown'))
         }
       } catch (e) {
         if (cancelled) return

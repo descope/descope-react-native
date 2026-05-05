@@ -250,6 +250,19 @@ describe('useSessionAutoRefresh (via AuthProvider)', () => {
 
     await advanceAndFlush(60 * 60 * 1000)
     expect(refresh).toHaveBeenCalledTimes(1)
+
+    // foreground transitions must not retry a fatally rejected refresh
+    setAppState('background')
+    await act(async () => {
+      appStateListener?.('background')
+      await Promise.resolve()
+    })
+    setAppState('active')
+    await act(async () => {
+      appStateListener?.('active')
+      await Promise.resolve()
+    })
+    expect(refresh).toHaveBeenCalledTimes(1)
   })
 
   it('disableAutoRefresh prop suppresses both timer and AppState listener', async () => {
