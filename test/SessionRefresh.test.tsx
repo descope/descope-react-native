@@ -5,7 +5,10 @@ import { AppState, type AppStateStatus } from 'react-native'
 import { AuthProvider, useSession } from '../src'
 import type { DescopeSessionManager } from '../src/types'
 import DescopeReactNative from '../src/internal/modules/descopeModule'
-import { REFRESH_THRESHOLD_MS, TRANSIENT_BACKOFF_MS } from '../src/internal/session/autoRefresh'
+
+// mirror the constants in useSessionAutoRefresh.ts
+const REFRESH_THRESHOLD_MS = 60 * 1000
+const TRANSIENT_BACKOFF_MS = 30 * 1000
 
 jest.mock('@descope/core-js-sdk', () => jest.fn())
 

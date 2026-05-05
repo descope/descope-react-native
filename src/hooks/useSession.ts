@@ -3,8 +3,11 @@ import type { JWTResponse, UserResponse } from '@descope/core-js-sdk'
 import useContext from '../internal/hooks/useContext'
 import DescopeReactNative from '../internal/modules/descopeModule'
 import type { DescopeSession, DescopeSessionManager } from '../types'
-import { millisecondsUntilExpiration, REFRESH_THRESHOLD_MS } from '../internal/session/autoRefresh'
+import { tokenExpirationWithinThreshold } from '../internal/core/token'
 import { clearCurrentSession, setCurrentTokens, setCurrentUser } from '../helpers'
+
+// The amount of time (ms) to trigger the refresh before session expires
+const REFRESH_THRESHOLD = 60 * 1000 // 1 minute
 
 const useSession = (): DescopeSessionManager => {
   const { sdk, logger, projectId, session, setSession, isSessionLoading } = useContext()
@@ -66,26 +69,27 @@ const useSession = (): DescopeSessionManager => {
   }
 
   const refreshSessionIfAboutToExpire = async () => {
-    if (!session || !session.refreshJwt) {
-      logger?.log("can't refresh session without an active session and refresh JWT")
+    if (!session || session.refreshJwt === '') {
+      logger?.warn("can't refresh session without a valid refresh token")
       return session
     }
-    if (millisecondsUntilExpiration(session.sessionJwt) > REFRESH_THRESHOLD_MS) {
+    if (tokenExpirationWithinThreshold(session.sessionJwt, REFRESH_THRESHOLD)) {
       logger?.log('session is valid')
       return session
     }
     logger?.log('session JWT about to expire, refreshing...')
     const resp = await sdk.refresh(session.refreshJwt)
-    if (resp.ok && resp.data) {
-      const updated: DescopeSession = {
-        ...session,
-        sessionJwt: resp.data.sessionJwt,
-        refreshJwt: resp.data.refreshJwt || session.refreshJwt,
+    if (resp.data) {
+      const { sessionJwt, refreshJwt } = resp.data
+      const updatedSession = {
+        sessionJwt,
+        refreshJwt: refreshJwt || session.refreshJwt,
+        user: session.user,
       }
-      await DescopeReactNative.saveItem(projectId, JSON.stringify(updated))
-      setCurrentTokens(updated.sessionJwt, updated.refreshJwt)
-      setSession(updated)
-      return updated
+      await DescopeReactNative.saveItem(projectId, JSON.stringify(updatedSession))
+      setCurrentTokens(updatedSession.sessionJwt, updatedSession.refreshJwt)
+      setSession(updatedSession)
+      return updatedSession
     }
     return session
   }
