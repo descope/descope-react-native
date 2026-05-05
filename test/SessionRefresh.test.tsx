@@ -274,39 +274,6 @@ describe('useSessionAutoRefresh (via AuthProvider)', () => {
     expect(DescopeReactNative.saveItem).toHaveBeenCalled()
   })
 
-  it('shares the in-flight mutex between auto-refresh and manual refreshSessionIfAboutToExpire', async () => {
-    const sessionExp = Math.floor(NOW / 1000) + 600
-    let resolveRefresh: ((v: { ok: true; data: { sessionJwt: string; refreshJwt: string } }) => void) | undefined
-    const refresh = jest.fn().mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolveRefresh = resolve
-        }),
-    )
-
-    const probe = await mountAuthProvider(refresh, makeSession(sessionExp))
-
-    await advanceAndFlush(600_000 - REFRESH_THRESHOLD_MS + 100)
-    expect(refresh).toHaveBeenCalledTimes(1)
-
-    // manual call while auto-refresh is in-flight, mutex should bail
-    await act(async () => {
-      await probe.manager!.refreshSessionIfAboutToExpire()
-    })
-    expect(refresh).toHaveBeenCalledTimes(1)
-
-    await act(async () => {
-      resolveRefresh!({
-        ok: true,
-        data: { sessionJwt: makeJwt(sessionExp + 600), refreshJwt: makeJwt(sessionExp + 7 * 86400) },
-      })
-      await Promise.resolve()
-      await Promise.resolve()
-      await Promise.resolve()
-    })
-    expect(refresh).toHaveBeenCalledTimes(1)
-  })
-
   it('drops the auto-refresh result when manageSession runs mid-flight', async () => {
     const sessionAExp = Math.floor(NOW / 1000) + 600
     const sessionBExp = Math.floor(NOW / 1000) + 7200

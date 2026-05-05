@@ -3,12 +3,12 @@ import type { JWTResponse, UserResponse } from '@descope/core-js-sdk'
 import useContext from '../internal/hooks/useContext'
 import DescopeReactNative from '../internal/modules/descopeModule'
 import type { DescopeSession, DescopeSessionManager } from '../types'
-import { millisecondsUntilExpiration, performRefresh, REFRESH_THRESHOLD_MS } from '../internal/session/autoRefresh'
+import { millisecondsUntilExpiration, REFRESH_THRESHOLD_MS } from '../internal/session/autoRefresh'
 import { persistSession } from '../internal/session/persist'
 import { clearCurrentSession, setCurrentTokens, setCurrentUser } from '../helpers'
 
 const useSession = (): DescopeSessionManager => {
-  const { sdk, logger, projectId, session, setSession, isSessionLoading, inFlightRefresh, sessionRef } = useContext()
+  const { sdk, logger, projectId, session, setSession, isSessionLoading } = useContext()
   if (!sdk) throw new Error('This hook requires the AuthProvider component to be initialized with a project ID')
 
   // when the sdk initializes, we want the return value of "isSessionLoading" to be true immediately
@@ -65,48 +65,27 @@ const useSession = (): DescopeSessionManager => {
   }
 
   const refreshSessionIfAboutToExpire = async () => {
-    if (!session) {
-      logger?.log("can't refresh session - no active session")
-      return session
-    }
-    if (!session.refreshJwt) {
-      logger?.log("can't refresh session - no refresh JWT")
+    if (!session || !session.refreshJwt) {
+      logger?.log("can't refresh session without an active session and refresh JWT")
       return session
     }
     if (millisecondsUntilExpiration(session.sessionJwt) > REFRESH_THRESHOLD_MS) {
       logger?.log('session is valid')
       return session
     }
-    if (inFlightRefresh.current) {
-      logger?.log('a refresh is already in flight, returning current session')
-      return session
-    }
-    const captured = session
-    inFlightRefresh.current = true
-    try {
-      const result = await performRefresh(sdk, captured, () => sessionRef.current === captured, logger)
-      if (result.kind === 'fresh') {
-        if (sessionRef.current !== captured) {
-          logger?.log('discarding manual refresh result, active session changed mid-flight')
-          return sessionRef.current
-        }
-        try {
-          await persistSession(projectId, result.session)
-        } catch (e) {
-          logger?.error('failed to persist refreshed session', e as Error)
-        }
-        if (sessionRef.current !== captured) {
-          logger?.log('discarding manual refresh result, active session changed during persist')
-          return sessionRef.current
-        }
-        setSession(result.session)
-        logger?.log('manual refresh succeeded')
-        return result.session
+    logger?.log('session JWT about to expire, refreshing...')
+    const resp = await sdk.refresh(session.refreshJwt)
+    if (resp.ok && resp.data) {
+      const updated: DescopeSession = {
+        ...session,
+        sessionJwt: resp.data.sessionJwt,
+        refreshJwt: resp.data.refreshJwt || session.refreshJwt,
       }
-      return session
-    } finally {
-      inFlightRefresh.current = false
+      await persistSession(projectId, updated)
+      setSession(updated)
+      return updated
     }
+    return session
   }
 
   return { session, manageSession, refreshSessionIfAboutToExpire, clearSession, updateTokens, updateUser, isSessionLoading: isLoading.current }

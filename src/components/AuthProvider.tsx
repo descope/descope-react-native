@@ -18,11 +18,6 @@ type Props = Pick<SdkConfig[0], 'projectId' | 'baseUrl' | 'logger' | 'fetch'> & 
 const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, disableAutoRefresh, children }) => {
   const [session, setSession] = useState<DescopeSession>()
   const [isSessionLoading, setSessionLoading] = useState<boolean>(true)
-  const inFlightRefresh = useRef<boolean>(false)
-  const sessionRef = useRef<DescopeSession | undefined>(session)
-  useEffect(() => {
-    sessionRef.current = session
-  }, [session])
 
   // Stable wrappers around `logger` and `fetch` so prop identity changes (e.g.
   // inline literals on parent re-renders) don't invalidate the SDK memo or
@@ -99,8 +94,6 @@ const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, disableAut
     setSession,
     projectId,
     logger: stableLogger,
-    inFlightRefresh,
-    sessionRef,
     disabled: disableAutoRefresh,
   })
 
@@ -112,8 +105,6 @@ const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, disableAut
       session,
       setSession,
       isSessionLoading,
-      inFlightRefresh,
-      sessionRef,
     }),
     [sdk, stableLogger, projectId, session, setSession, isSessionLoading],
   )
