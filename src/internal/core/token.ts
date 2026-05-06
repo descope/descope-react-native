@@ -5,7 +5,7 @@ export const tokenExpirationWithinThreshold = (token: string, msThreshold: numbe
   return expiration ? millisecondsUntilDate(expiration) > msThreshold : false
 }
 
-const getTokenExpiration = (token: string) => {
+export const getTokenExpiration = (token: string) => {
   const parts = token.split('.')
   try {
     if (parts.length === 3 && parts[1]) {

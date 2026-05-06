@@ -8,7 +8,7 @@ The SDK is developed and tested against the versions listed below. Older version
 
 | Requirement                 | Version                                                                          |
 | --------------------------- | -------------------------------------------------------------------------------- |
-| React Native                | `0.78` (current release) — works on `>= 0.74` via the React Native interop layer |
+| React Native                | `0.78` (current release) - works on `>= 0.74` via the React Native interop layer |
 | React                       | `19.0` (shipped with React Native 0.78)                                          |
 | Node.js                     | `>= 18.18.0`                                                                     |
 | iOS deployment target       | `>= 13.0`                                                                        |
@@ -17,11 +17,11 @@ The SDK is developed and tested against the versions listed below. Older version
 | Android `compileSdkVersion` | `35`                                                                             |
 | Java / Kotlin JVM target    | `17`                                                                             |
 
-**Architecture:** The library is written against the legacy bridge architecture. On apps using React Native's New Architecture (default since `0.76`), the library is transparently wrapped by the interop layer — no host configuration required. Migration to the newer architecture is roadmapped.
+**Architecture:** The library is written against the legacy bridge architecture. On apps using React Native's New Architecture (default since `0.76`), the library is transparently wrapped by the interop layer - no host configuration required. Migration to the newer architecture is roadmapped.
 
-**Expo:** Expo is supported, however because the library ships native code, it requires a [custom development build](https://docs.expo.dev/develop/development-builds/introduction/) or the bare workflow — Expo Go is a pre-built app and thus will not work.
+**Expo:** Expo is supported, however because the library ships native code, it requires a [custom development build](https://docs.expo.dev/develop/development-builds/introduction/) or the bare workflow - Expo Go is a pre-built app and thus will not work.
 
-**XCode 26+:** New versions of XCode may cause an `fmt` compatibility issue with Xcode 26's clang and affects any React Native app — not this SDK specifically. It's fixed upstream in React Native `0.84+` which ships a newer `fmt`. If you're on an earlier version, you'll need to patch your iOS build. See the [troubleshooting section](#fixing-xcode-26-compatibility-issues) for detailed patching steps.
+**XCode 26+:** New versions of XCode may cause an `fmt` compatibility issue with Xcode 26's clang and affects any React Native app - not this SDK specifically. It's fixed upstream in React Native `0.84+` which ships a newer `fmt`. If you're on an earlier version, you'll need to patch your iOS build. See the [troubleshooting section](#fixing-xcode-26-compatibility-issues) for detailed patching steps.
 
 ## Requirements
 
@@ -84,16 +84,18 @@ const logger = {
 
 The `logger` prop accepts any object that implements `log`, `debug`, `warn`, and `error` methods, making it easy to hook up to any monitoring or observability service. During development you can pass `console` directly for quick debugging.
 
-The logger receives messages from both the JavaScript layer and the native SDK layer (iOS/Android), so all SDK activity — including flow execution and network calls — will be captured.
+The logger receives messages from both the JavaScript layer and the native SDK layer (iOS/Android), so all SDK activity - including flow execution and network calls - will be captured.
 
 ## Session Management
 
 The `useSession` hook is used to manage an authenticated user session for an application.
 
-The session manager takes care of loading and saving the session as well
-as ensuring that it's refreshed when needed. When the user completes a sign
-in flow successfully you should set the `DescopeSession` as the
-active session of the session manager.
+The session manager takes care of loading, saving, and automatically refreshing
+the session. Auto-refresh is background-aware and on by default. Pass
+`autoRefresh={false}` to `<AuthProvider>` if you need to opt out.
+
+When the user completes a sign in flow successfully you should set the
+`DescopeSession` as the active session of the session manager.
 
 ```js
 import { useDescope, useSession } from '@descope/react-native-sdk'
@@ -143,6 +145,14 @@ These functions are available outside of the component render-lifecycle.
 This might be useful, for example, to add an authorization header to all authenticated requests.
 
 ### Refreshing the Session
+
+Most apps no longer need to refresh the session manually - the auto-refresh
+described above keeps the session warm in the background and survives process
+kills, since the persisted session in secure storage is loaded on the next
+launch and rescheduled automatically. The patterns below apply when you've
+disabled auto-refresh via `autoRefresh={false}`, or when you need to guarantee a
+fresh session at a specific moment regardless of the auto-refresh schedule (for
+example, immediately before a request that cannot tolerate a `401`).
 
 The guiding principal of refreshing the session is the same, regardless of any specific
 app architecture or network framework.
@@ -379,7 +389,7 @@ const App = () => {
 
 ### Fixing XCode 26+ Compatibility Issues
 
-**Standard React Native project** — add this to `ios/Podfile` inside `post_install`:
+**Standard React Native project** - add this to `ios/Podfile` inside `post_install`:
 
 ```ruby
 post_install do |installer|
@@ -396,7 +406,7 @@ post_install do |installer|
 end
 ```
 
-**Expo project** — because Expo regenerates the `Podfile` on every `prebuild`, use a config plugin. Create `plugins/fix-fmt-consteval.js`:
+**Expo project** - because Expo regenerates the `Podfile` on every `prebuild`, use a config plugin. Create `plugins/fix-fmt-consteval.js`:
 
 ```js
 const { withDangerousMod } = require('expo/config-plugins')

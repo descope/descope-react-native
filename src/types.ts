@@ -27,13 +27,12 @@ export interface DescopeSession {
  * The `DescopeSessionManager` is used to manage an authenticated
  * user session for an application.
  *
- * The session manager takes care of loading and saving the session as well
- * as ensuring that it's refreshed when needed.
+ * The session manager takes care of loading, saving, and automatically
+ * refreshing the session. Auto-refresh is background-aware and on by
+ * default. To disable it, pass `autoRefresh={false}` to `<AuthProvider>`.
  *
- * The session manager takes care of loading and saving the session as well
- * as ensuring that it's refreshed when needed. When the user completes a sign
- * in flow successfully you should set the `DescopeSession` as the
- * active session of the session manager.
+ * When the user completes a sign-in flow successfully you should set the
+ * `DescopeSession` as the active session of the session manager.
  *
  *     import { useDescope, useSession } from '@descope/react-native-sdk'
  *
@@ -76,6 +75,12 @@ export interface DescopeSessionManager {
    * The session manager checks whether there's an active [DescopeSession] and if
    * its session JWT expires within the next 60 seconds. If that's the case then
    * the session is refreshed and persisted before returning.
+   *
+   * Most apps no longer need to call this manually, since auto-refresh handles
+   * keeping the session warm in the background. Use this only when you need
+   * to guarantee a fresh session at a specific moment (e.g. immediately before
+   * a request that cannot tolerate a 401), or when auto-refresh is disabled
+   * via `autoRefresh={false}` on `<AuthProvider>`.
    */
   refreshSessionIfAboutToExpire(): Promise<DescopeSession | undefined>
   /**
