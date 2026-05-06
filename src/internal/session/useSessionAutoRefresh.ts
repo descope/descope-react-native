@@ -26,7 +26,7 @@ type Args = {
   setSession: React.Dispatch<React.SetStateAction<DescopeSession | undefined>>
   projectId: string
   logger?: SdkLogger
-  disabled?: boolean
+  enabled?: boolean
 }
 
 /**
@@ -34,9 +34,9 @@ type Args = {
  * keyed off the current session JWT's expiration, paused on background and
  * started on foreground.
  */
-const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, disabled }: Args): void => {
+const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, enabled }: Args): void => {
   useEffect(() => {
-    if (disabled || !sdk || !session) return undefined
+    if (!enabled || !sdk || !session) return undefined
     if (isTokenExpired(session.refreshJwt)) {
       logger?.log('refresh JWT is expired, not scheduling auto-refresh')
       return undefined
@@ -46,7 +46,7 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, di
     let cancelled = false
     let stopped = false
 
-    const stop = () => {
+    const clearTimer = () => {
       if (timer !== null) {
         clearTimeout(timer)
         timer = null
@@ -58,7 +58,7 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, di
       const exp = getTokenExpiration(session.sessionJwt)
       if (!exp) return
       const delay = Math.min(MAX_TIMEOUT_MS, Math.max(0, exp.getTime() - Date.now() - REFRESH_THRESHOLD_MS))
-      stop()
+      clearTimer()
       if (delay === 0) {
         refresh()
       } else {
@@ -101,7 +101,7 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, di
       if (state === 'background') {
         if (timer !== null) {
           logger?.debug('pausing auto-refresh, app moved to background')
-          stop()
+          clearTimer()
         }
       } else if (state === 'active' && timer === null) {
         start()
@@ -112,10 +112,10 @@ const useSessionAutoRefresh = ({ sdk, session, setSession, projectId, logger, di
     return () => {
       cancelled = true
       sub.remove()
-      stop()
+      clearTimer()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- setSession/projectId/logger are stable
-  }, [sdk, session, disabled])
+  }, [sdk, session, enabled])
 }
 
 export default useSessionAutoRefresh

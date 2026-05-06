@@ -9,13 +9,14 @@ import { setCurrentTokens, setCurrentUser } from '../helpers'
 
 type Props = Pick<SdkConfig[0], 'projectId' | 'baseUrl' | 'logger' | 'fetch'> & {
   /**
-   * Disables the background auto-refresh of the active session. Defaults to
-   * `false`. When `true`, refresh only happens via `refreshSessionIfAboutToExpire`.
+   * Whether the SDK should automatically refresh the active session in the
+   * background. Defaults to `true`. When `false`, refresh only happens via
+   * a direct call to `refresh` or `refreshSessionIfAboutToExpire`.
    */
-  disableAutoRefresh?: boolean
+  autoRefresh?: boolean
   children?: React.ReactNode
 }
-const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, disableAutoRefresh, children }) => {
+const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, autoRefresh = true, children }) => {
   const [session, setSession] = useState<DescopeSession>()
   const [isSessionLoading, setSessionLoading] = useState<boolean>(true)
 
@@ -94,7 +95,7 @@ const AuthProvider: FC<Props> = ({ projectId, baseUrl, logger, fetch, disableAut
     setSession,
     projectId,
     logger: stableLogger,
-    disabled: disableAutoRefresh,
+    enabled: autoRefresh,
   })
 
   const context = useMemo(

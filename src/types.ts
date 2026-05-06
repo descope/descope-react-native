@@ -29,7 +29,7 @@ export interface DescopeSession {
  *
  * The session manager takes care of loading, saving, and automatically
  * refreshing the session. Auto-refresh is background-aware and on by
- * default. To disable it, pass `disableAutoRefresh` to `<AuthProvider>`.
+ * default. To disable it, pass `autoRefresh={false}` to `<AuthProvider>`.
  *
  * When the user completes a sign-in flow successfully you should set the
  * `DescopeSession` as the active session of the session manager.
@@ -80,7 +80,7 @@ export interface DescopeSessionManager {
    * keeping the session warm in the background. Use this only when you need
    * to guarantee a fresh session at a specific moment (e.g. immediately before
    * a request that cannot tolerate a 401), or when auto-refresh is disabled
-   * via `disableAutoRefresh` on `<AuthProvider>`.
+   * via `autoRefresh={false}` on `<AuthProvider>`.
    */
   refreshSessionIfAboutToExpire(): Promise<DescopeSession | undefined>
   /**

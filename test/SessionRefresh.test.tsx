@@ -79,7 +79,7 @@ const ProbeComponent = ({ probe }: { probe: Probe }) => {
   return null
 }
 
-const mountAuthProvider = async (refresh: jest.Mock, initialSession: ReturnType<typeof makeSession> | null, props: { disableAutoRefresh?: boolean } = {}): Promise<Probe> => {
+const mountAuthProvider = async (refresh: jest.Mock, initialSession: ReturnType<typeof makeSession> | null, props: { autoRefresh?: boolean } = {}): Promise<Probe> => {
   ;(createCoreSdk as unknown as jest.Mock).mockReturnValue({ refresh })
   ;(DescopeReactNative.loadItem as jest.Mock).mockResolvedValue(initialSession ? JSON.stringify(initialSession) : null)
 
@@ -265,11 +265,11 @@ describe('useSessionAutoRefresh (via AuthProvider)', () => {
     expect(refresh).toHaveBeenCalledTimes(1)
   })
 
-  it('disableAutoRefresh prop suppresses both timer and AppState listener', async () => {
+  it('autoRefresh={false} suppresses both timer and AppState listener', async () => {
     const sessionExp = Math.floor(NOW / 1000) + 600
     const refresh = jest.fn()
 
-    await mountAuthProvider(refresh, makeSession(sessionExp), { disableAutoRefresh: true })
+    await mountAuthProvider(refresh, makeSession(sessionExp), { autoRefresh: false })
 
     await advanceAndFlush(600_000 + 60_000)
     expect(refresh).not.toHaveBeenCalled()

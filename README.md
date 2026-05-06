@@ -92,7 +92,7 @@ The `useSession` hook is used to manage an authenticated user session for an app
 
 The session manager takes care of loading, saving, and automatically refreshing
 the session. Auto-refresh is background-aware and on by default. Pass
-`disableAutoRefresh` to `<AuthProvider>` if you need to opt out.
+`autoRefresh={false}` to `<AuthProvider>` if you need to opt out.
 
 When the user completes a sign in flow successfully you should set the
 `DescopeSession` as the active session of the session manager.
@@ -150,7 +150,7 @@ Most apps no longer need to refresh the session manually - the auto-refresh
 described above keeps the session warm in the background and survives process
 kills, since the persisted session in secure storage is loaded on the next
 launch and rescheduled automatically. The patterns below apply when you've
-disabled auto-refresh via `disableAutoRefresh`, or when you need to guarantee a
+disabled auto-refresh via `autoRefresh={false}`, or when you need to guarantee a
 fresh session at a specific moment regardless of the auto-refresh schedule (for
 example, immediately before a request that cannot tolerate a `401`).
 
