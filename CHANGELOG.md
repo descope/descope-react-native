@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.0](https://github.com/descope/descope-react-native/compare/v0.10.1...v0.11.0) (2026-06-07)
+
+
+### Features
+
+* add background-aware session auto-refresh ([#170](https://github.com/descope/descope-react-native/issues/170)) ([82a49bf](https://github.com/descope/descope-react-native/commit/82a49bf3d40cd5de49d5ddaa9873dc139312a57c))
+
+
+### Bug Fixes
+
+* **deps:** bump @descope/core-js-sdk to 2.62.1 (Metro/Hermes RN 0.85 fix) ([#172](https://github.com/descope/descope-react-native/issues/172)) ([0fd6a29](https://github.com/descope/descope-react-native/commit/0fd6a29084b8f1f5be0e211461508fb70d988e92))
+
 ## [0.10.1](https://github.com/descope/descope-react-native/compare/v0.10.0...v0.10.1) (2026-04-29)
 
 
