@@ -1,6 +1,6 @@
 PODS:
   - boost (1.84.0)
-  - descope-react-native (0.10.1):
+  - descope-react-native (0.11.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1763,7 +1763,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
-  descope-react-native: 9dc3bbc15bf1d6ce9b8d6e46443b1e58e2b0032c
+  descope-react-native: 8d00ce9a5a6f4934d8fc9a6947dc8a962c5b6b06
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: 6fe148afcef2e3213e484758e3459609d40d57f5
