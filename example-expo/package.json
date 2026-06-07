@@ -11,14 +11,14 @@
   },
   "dependencies": {
     "@descope/react-native-sdk": "link:..",
-    "expo": "53.0.27",
-    "expo-dev-client": "5.2.4",
-    "react": "19.0.0",
-    "react-native": "0.79.6"
+    "expo": "56.0.9",
+    "expo-dev-client": "~56.0.19",
+    "react": "19.2.3",
+    "react-native": "0.85.3"
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
-    "@types/react": "19.0.14",
-    "typescript": "5.8.3"
+    "@types/react": "~19.2.14",
+    "typescript": "~6.0.3"
   }
 }
