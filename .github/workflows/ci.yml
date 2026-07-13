@@ -102,7 +102,11 @@ jobs:
           yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}"
 
   build-ios:
-    runs-on: macos-latest
+    # Pinned to macos-15 (Xcode 16) for a deterministic image that doesn't drift like
+    # macos-latest. Xcode 16 is required: the vendored descope-swift-sdk uses typed throws
+    # (`throws(DescopeError)`), a Swift 6 feature. The intermittent Ld failures from Xcode 16's
+    # default explicit C++ modules are handled by CLANG_ENABLE_EXPLICIT_MODULES=NO in build:ios.
+    runs-on: macos-15
     env:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
