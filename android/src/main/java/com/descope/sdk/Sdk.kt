@@ -4,6 +4,7 @@ package com.descope.sdk
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.net.Uri
 import android.os.Looper
 import com.descope.android.DescopeSystemInfo
 import com.descope.internal.http.DescopeClient
@@ -16,11 +17,14 @@ import com.descope.internal.routes.OAuth
 import com.descope.internal.routes.Otp
 import com.descope.internal.routes.Passkey
 import com.descope.internal.routes.Password
+import com.descope.internal.routes.Push
 import com.descope.internal.routes.Sso
 import com.descope.internal.routes.Totp
+import com.descope.internal.others.with
 import com.descope.session.DescopeSessionManager
 import com.descope.session.SessionLifecycle
 import com.descope.session.SessionStorage
+import com.descope.types.DescopeException
 
 class DescopeSdk(context: Context, projectId: String, configure: DescopeConfig.() -> Unit) {
     var sessionManager: DescopeSessionManager
@@ -33,6 +37,7 @@ class DescopeSdk(context: Context, projectId: String, configure: DescopeConfig.(
     val sso: DescopeSso
     val passkey: DescopePasskey
     val password: DescopePassword
+    val push: DescopePush
     @Deprecated(message = "Use DescopeFlowView instead")
     val flow: DescopeFlow
 
@@ -59,12 +64,32 @@ class DescopeSdk(context: Context, projectId: String, configure: DescopeConfig.(
         sso = Sso(client)
         passkey = Passkey(client)
         password = Password(client)
+        push = Push(client)
         flow = Flow(client)
         // init session manager
         sessionManager = initDefaultManager(context, config)
     }
 
+    /**
+     * Resumes an ongoing authentication that's waiting for an external authentication step.
+     *
+     * - **Important**: This function must be called on the main thread, or it will throw
+     * a [DescopeException.flowSetup] error.
+     */
+    fun handleUri(uri: Uri): Boolean {
+        if (Looper.getMainLooper().thread != Thread.currentThread()) {
+            throw DescopeException.flowSetup.with(message = "Descope.handleUri must be called on the main thread")
+        }
+        return resume(uri)
+    }
+
     // Internal
+
+    /**
+     * While the flow is running this is set to a closure with a weak reference to
+     * the [DescopeFlowCoordinator] to provide it with the resume URI.
+     */
+    internal var resume: (Uri) -> Boolean = { false }
 
     private fun initDefaultManager(context: Context, config: DescopeConfig): DescopeSessionManager {
         val storage = SessionStorage(context.applicationContext, config.projectId, config.logger)
@@ -79,6 +104,6 @@ class DescopeSdk(context: Context, projectId: String, configure: DescopeConfig.(
         const val NAME = "DescopeAndroid"
 
         /** The Descope SDK version */
-        const val VERSION = "0.18.2"
+        const val VERSION = "0.19.1" // x-release-please-version
     }
 }

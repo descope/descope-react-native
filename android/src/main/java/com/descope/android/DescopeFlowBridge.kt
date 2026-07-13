@@ -19,6 +19,7 @@ import com.descope.internal.others.debug
 import com.descope.internal.others.error
 import com.descope.internal.others.info
 import com.descope.internal.others.isUnsafeEnabled
+import com.descope.internal.others.parseServerError
 import com.descope.internal.others.stringOrEmptyAsNull
 import com.descope.internal.others.with
 import com.descope.internal.routes.isWebAuthnSupported
@@ -103,8 +104,15 @@ internal class FlowBridge(val webView: WebView) {
     }
 
     private fun bridgeOnError(error: String) {
+        val parsed = parseServerError(error)
+        val exception = when {
+            parsed == null -> DescopeException.flowFailed.with(message = error)
+            // Convert server flow cancellation to local flow cancellation for cohesive error handling
+            parsed.code == "E102122" -> DescopeException.flowCancelled.with(message = parsed.message)
+            else -> parsed
+        }
         handler.post {
-            listener?.onError(DescopeException.flowFailed.with(message = error))
+            listener?.onError(exception)
         }
     }
 
@@ -305,16 +313,14 @@ internal data class FlowBridgeAttributes(
 
 internal sealed class FlowBridgeRequest {
     class OAuthNative(val start: JSONObject) : FlowBridgeRequest()
-    class OAuthWeb(val startUrl: String) : FlowBridgeRequest()
-    class Sso(val startUrl: String) : FlowBridgeRequest()
+    class WebAuth(val variant: String, val startUrl: String) : FlowBridgeRequest()
     class WebAuthnCreate(val transactionId: String, val options: String) : FlowBridgeRequest()
     class WebAuthnGet(val transactionId: String, val options: String) : FlowBridgeRequest()
 
     val type
         get() = when (this) {
             is OAuthNative -> "oauthNative"
-            is OAuthWeb -> "oauthWeb"
-            is Sso -> "sso"
+            is WebAuth -> variant
             is WebAuthnCreate -> "webauthnCreate"
             is WebAuthnGet -> "webauthnGet"
         }
@@ -326,8 +332,7 @@ internal sealed class FlowBridgeRequest {
             return json.getJSONObject("payload").run {
                 when (type) {
                     "oauthNative" -> OAuthNative(start = getJSONObject("start"))
-                    "oauthWeb" -> OAuthWeb(startUrl = getString("startUrl"))
-                    "sso" -> Sso(startUrl = getString("startUrl"))
+                    "oauthWeb", "sso", "externalAuth" -> WebAuth(variant = type, startUrl = getString("startUrl"))
                     "webauthnCreate" -> WebAuthnCreate(transactionId = getString("transactionId"), options = getString("options"))
                     "webauthnGet" -> WebAuthnGet(transactionId = getString("transactionId"), options = getString("options"))
                     else -> throw DescopeException.flowFailed.with(message = "Unexpected server response in flow")
@@ -340,16 +345,14 @@ internal sealed class FlowBridgeRequest {
 internal sealed class FlowBridgeResponse {
     class OAuthNative(val stateId: String, val identityToken: String) : FlowBridgeResponse()
     class WebAuthn(val type: String, val transactionId: String, val response: String) : FlowBridgeResponse()
-    class WebAuth(val type: String, val url: String) : FlowBridgeResponse()
-    class MagicLink(val url: String) : FlowBridgeResponse()
+    class DeepLink(val type: String, val url: String) : FlowBridgeResponse()
     class Failure(val failure: String) : FlowBridgeResponse()
 
     val typeName: String
         get() = when (this) {
             is OAuthNative -> "oauthNative"
             is WebAuthn -> type
-            is WebAuth -> type
-            is MagicLink -> "magicLink"
+            is DeepLink -> type
             is Failure -> "failure"
         }
 
@@ -365,8 +368,7 @@ internal sealed class FlowBridgeResponse {
                 put("transactionId", transactionId)
                 put("response", response)
             }.toString()
-            is WebAuth -> JSONObject().apply { put("url", url) }.toString()
-            is MagicLink -> JSONObject().apply { put("url", url) }.toString()
+            is DeepLink -> JSONObject().apply { put("url", url) }.toString()
             is Failure -> JSONObject().apply { put("failure", failure) }.toString()
         }
 }
