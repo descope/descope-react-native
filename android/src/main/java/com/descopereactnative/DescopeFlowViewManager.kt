@@ -195,8 +195,8 @@ private fun AuthenticationResponse.toJsonString(): String {
     put("refreshJwt", refreshToken.jwt)
     put("user", user.toJson())
     put("firstSeen", isFirstAuthentication)
+    externalToken?.run { put("externalToken", this) }
   }
-  println(json.toString(2))
   return json.toString()
 }
 

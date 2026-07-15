@@ -297,6 +297,23 @@ final class DescopeClient: HTTPClient, @unchecked Sendable {
         ])
     }
     
+    // MARK: - Push
+    
+    func pushEnrollDevice(provider: String, token: String, device: String, refreshJwt: String) async throws(DescopeError) {
+        try await post("auth/push/update", headers: authorization(with: refreshJwt), body: [
+            "provider": provider,
+            "token": token,
+            "device": device,
+        ])
+    }
+    
+    func pushSignInFinish(transactionId: String, approved: Bool, refreshJwt: String) async throws(DescopeError) {
+        try await post("auth/push/signin/finish", headers: authorization(with: refreshJwt), body: [
+            "transactionId": transactionId,
+            "result": approved ? "approved" : "denied",
+        ])
+    }
+    
     // MARK: - OAuth
     
     struct OAuthResponse: JSONResponse {
@@ -430,6 +447,7 @@ final class DescopeClient: HTTPClient, @unchecked Sendable {
         var cookieDomain: String?
         var cookieName: String?
         var sessionCookieName: String?
+        var externalToken: String?
 
         mutating func setValues(from data: Data, response: HTTPURLResponse) throws {
             guard let url = response.url, let fields = response.allHeaderFields as? [String: String] else { return }
@@ -559,6 +577,7 @@ final class DescopeClient: HTTPClient, @unchecked Sendable {
             "x-descope-sdk-version": DescopeSDK.version,
             "x-descope-platform-name": SystemInfo.osName,
             "x-descope-platform-version": SystemInfo.osVersion,
+            "x-descope-device": SystemInfo.device,
             "x-descope-project-id": config.projectId,
         ]
         if let appName = SystemInfo.appName, !appName.isEmpty {
@@ -566,9 +585,6 @@ final class DescopeClient: HTTPClient, @unchecked Sendable {
         }
         if let appVersion = SystemInfo.appVersion, !appVersion.isEmpty {
             headers["x-descope-app-version"] = appVersion
-        }
-        if let device = SystemInfo.device, !device.isEmpty {
-            headers["x-descope-device"] = device
         }
         return headers
     }

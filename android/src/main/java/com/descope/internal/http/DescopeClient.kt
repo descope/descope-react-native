@@ -1,6 +1,7 @@
 package com.descope.internal.http
 
 import com.descope.android.SystemInfo
+import com.descope.internal.others.parseServerError
 import com.descope.sdk.DescopeConfig
 import com.descope.sdk.DescopeSdk
 import com.descope.types.DeliveryMethod
@@ -14,7 +15,7 @@ import com.descope.types.SignUpDetails
 import com.descope.types.UpdateOptions
 import java.net.HttpCookie
 
-internal open class DescopeClient(internal val config: DescopeConfig, systemInfo: SystemInfo) : HttpClient(config.baseUrl ?: baseUrlForProjectId(config.projectId), config.logger, config.networkClient) {
+internal open class DescopeClient(internal val config: DescopeConfig, internal val systemInfo: SystemInfo) : HttpClient(config.baseUrl ?: baseUrlForProjectId(config.projectId), config.logger, config.networkClient) {
 
     // OTP
 
@@ -457,6 +458,29 @@ internal open class DescopeClient(internal val config: DescopeConfig, systemInfo
         body = mapOf(
             "flowId" to flowId,
             "codeChallenge" to codeChallenge,
+        ),
+    )
+
+    // Push
+
+    suspend fun pushEnrollDevice(token: String, device: String, refreshJwt: String): Unit = post(
+        route = "auth/push/update",
+        decoder = emptyResponse,
+        headers = authorization(refreshJwt),
+        body = mapOf(
+            "provider" to "fcm",
+            "token" to token,
+            "device" to device,
+        ),
+    )
+
+    suspend fun pushSignInFinish(transactionId: String, approved: Boolean, refreshJwt: String): Unit = post(
+        route = "auth/push/signin/finish",
+        decoder = emptyResponse,
+        headers = authorization(refreshJwt),
+        body = mapOf(
+            "transactionId" to transactionId,
+            "result" to if (approved) "approved" else "denied",
         ),
     )
 
