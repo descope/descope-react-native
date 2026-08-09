@@ -79,10 +79,8 @@ class DescopeReactNative: RCTEventEmitter {
         Task { @MainActor in
             do {
                 resolve(try await Passkey.performRegister(options: options, logger: nil))
-            } catch let error as DescopeError {
-                reject(error.code, error.desc, error)
             } catch {
-                reject(DescopeError.passkeyFailed.code, error.localizedDescription, error)
+                rejectPasskey(reject, error)
             }
         }
     }
@@ -93,10 +91,8 @@ class DescopeReactNative: RCTEventEmitter {
         Task { @MainActor in
             do {
                 resolve(try await Passkey.performAssertion(options: options, logger: nil))
-            } catch let error as DescopeError {
-                reject(error.code, error.desc, error)
             } catch {
-                reject(DescopeError.passkeyFailed.code, error.localizedDescription, error)
+                rejectPasskey(reject, error)
             }
         }
     }
@@ -250,6 +246,13 @@ private extension Data {
         guard SecRandomCopyBytes(kSecRandomDefault, count, &bytes) == errSecSuccess else { return nil }
         self = Data(bytes: bytes, count: count)
     }
+}
+
+private func rejectPasskey(_ reject: RCTPromiseRejectBlock, _ error: Error) {
+    guard let error = error as? DescopeError else {
+        return reject(DescopeError.passkeyFailed.code, error.localizedDescription, error)
+    }
+    reject(error.code, error.message.map { "\(error.desc): \($0)" } ?? error.desc, error)
 }
 
 private func prepareInitialRequest(for flowURL: String, with codeChallenge: String) throws -> URL {
