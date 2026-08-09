@@ -232,7 +232,7 @@ private class ReactNativeDescopeLogger(
 }
 
 private fun Promise.rejectPasskey(e: Exception) = when (e) {
-  is DescopeException -> reject(e.code, e.message?.let { "${e.desc}: $it" } ?: e.desc, e)
+  is DescopeException -> reject(e.code, e.message ?: e.desc, e)
   else -> reject(DescopeException.passkeyFailed.code, e.message ?: DescopeException.passkeyFailed.desc, e)
 }
 

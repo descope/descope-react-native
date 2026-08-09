@@ -252,7 +252,7 @@ private func rejectPasskey(_ reject: RCTPromiseRejectBlock, _ error: Error) {
     guard let error = error as? DescopeError else {
         return reject(DescopeError.passkeyFailed.code, error.localizedDescription, error)
     }
-    reject(error.code, error.message.map { "\(error.desc): \($0)" } ?? error.desc, error)
+    reject(error.code, error.message ?? error.desc, error)
 }
 
 private func prepareInitialRequest(for flowURL: String, with codeChallenge: String) throws -> URL {
