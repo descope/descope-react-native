@@ -385,6 +385,79 @@ const App = () => {
 
 **For more SDK usage examples refer to [docs](https://docs.descope.com/build/guides/client_sdks/)**
 
+## Passkeys
+
+Passkeys work inside flows out of the box. The `passkey` API lets you authenticate with the
+platform authenticator directly, without running a flow.
+
+Passkeys require **iOS 15** or **Android 9** (API 28). This does not change the minimum versions
+the SDK supports - it is a runtime requirement, so keep your deployment target and
+`minSdkVersion` as they are and use `isSupported()` to decide whether to offer passkeys.
+
+### Setup #1: Configure the project
+
+Enable Passkeys (WebAuthn) in the [Descope Console](https://app.descope.com/settings/authentication/webauthn)
+and set the top level domain. The domain is required - unlike flows, the native API has no
+fallback that derives it from the caller, so passkeys will fail without it.
+
+### Setup #2.1: Associated domains on iOS
+
+Add a [`webcredentials`](https://developer.apple.com/documentation/xcode/supporting-associated-domains)
+associated domain entitlement matching the domain configured above:
+
+```
+webcredentials:example.com
+```
+
+### Setup #2.2: Digital Asset Links on Android
+
+Host an [`assetlinks.json`](https://developer.android.com/training/sign-in/passkeys#add-support-dal)
+file on that same domain, including the `get_login_creds` relation.
+
+Android derives its origin from the app's signing certificate, as
+`android:apk-key-hash:<sha256>`.
+
+Registering these certificate fingerprints in the Descope project is **optional**. If none are
+configured, any Android origin is accepted. Registering them restricts passkey authentication to
+builds you signed, which is recommended for production.
+
+Note that this is all or nothing: as soon as one fingerprint is registered, any origin that does
+not match a registered fingerprint is rejected. Register every certificate you ship with:
+
+- The **debug** certificate, for local development builds.
+- The **release** (upload) certificate.
+- The **Play App Signing** certificate, if the app is distributed through Google Play. Play
+  re-signs the app with a key Google holds, so the certificate that reaches users is not your
+  upload key. Take it from Play Console -> Setup -> App integrity -> App signing.
+
+Omitting the Play App Signing certificate produces a failure that is easy to miss during testing:
+passkeys work in local and internal builds, and fail only for users who installed from the Play
+Store.
+
+### Usage
+
+```js
+import { useDescope, useSession } from '@descope/react-native-sdk'
+
+const descope = useDescope()
+const { manageSession } = useSession()
+
+// authenticates an existing user, or creates one if they don't exist yet
+const resp = await descope.passkey.signUpOrIn('andy@example.com')
+manageSession(resp.data)
+```
+
+`signUp(loginId, name)`, `signIn(loginId)` and `add(loginId, refreshJwt)` are also available.
+
+Check `isSupported()` before offering passkeys, so devices that cannot use them are not shown
+the option:
+
+```js
+if (await descope.passkey.isSupported()) {
+  // show the passkey option
+}
+```
+
 ## Troubleshooting
 
 ### Fixing XCode 26+ Compatibility Issues

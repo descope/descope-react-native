@@ -14,5 +14,9 @@ interface DescopeNative {
   saveItem(key: string, value: string): Promise<string>
   removeItem(key: string): Promise<string>
   configureLogging(level: string, unsafe: boolean): Promise<void>
+  passkeySupported(): Promise<boolean>
+  passkeyOrigin(): Promise<string>
+  passkeyCreate(options: string): Promise<string>
+  passkeyAuthenticate(options: string): Promise<string>
 }
 export default DescopeReactNative as DescopeNative

@@ -1,5 +1,6 @@
 package com.descopereactnative
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -10,7 +11,15 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.descope.Descope
+import com.descope.internal.routes.getPackageOrigin
+import com.descope.internal.routes.isWebAuthnSupported
+import com.descope.internal.routes.performAssertion
+import com.descope.internal.routes.performRegister
 import com.descope.sdk.DescopeLogger
+import com.descope.types.DescopeException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -23,6 +32,10 @@ import androidx.core.net.toUri
 import androidx.core.content.edit
 
 private const val prefName = "com.descope.reactnative"
+private const val noActivityCode = "no_activity"
+private const val noActivityMessage = "Passkeys require an active activity"
+private const val passkeyUnsupportedCode = "passkey_unsupported"
+private const val passkeyUnsupportedMessage = "Passkeys require Android API 28 or newer"
 
 class DescopeReactNativeModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -127,6 +140,60 @@ class DescopeReactNativeModule(private val reactContext: ReactApplicationContext
     promise.resolve(key)
   }
 
+  // Passkey
+
+  @ReactMethod
+  fun passkeySupported(promise: Promise) {
+    promise.resolve(isWebAuthnSupported)
+  }
+
+  @ReactMethod
+  fun passkeyOrigin(promise: Promise) {
+    val activity = passkeyActivity(promise) ?: return
+    try {
+      promise.resolve(getPackageOrigin(activity))
+    } catch (e: Exception) {
+      promise.rejectPasskey(e)
+    }
+  }
+
+  @ReactMethod
+  fun passkeyCreate(options: String, promise: Promise) {
+    val activity = passkeyActivity(promise) ?: return
+    CoroutineScope(Dispatchers.Main).launch {
+      try {
+        promise.resolve(performRegister(activity, options))
+      } catch (e: Exception) {
+        promise.rejectPasskey(e)
+      }
+    }
+  }
+
+  @ReactMethod
+  fun passkeyAuthenticate(options: String, promise: Promise) {
+    val activity = passkeyActivity(promise) ?: return
+    CoroutineScope(Dispatchers.Main).launch {
+      try {
+        promise.resolve(performAssertion(activity, options))
+      } catch (e: Exception) {
+        promise.rejectPasskey(e)
+      }
+    }
+  }
+
+  private fun passkeyActivity(promise: Promise): Activity? {
+    val activity = activityFromReactContext(reactContext)
+    if (activity == null) {
+      promise.reject(noActivityCode, noActivityMessage)
+      return null
+    }
+    if (!isWebAuthnSupported) {
+      promise.reject(passkeyUnsupportedCode, passkeyUnsupportedMessage)
+      return null
+    }
+    return activity
+  }
+
   companion object {
     const val NAME = "DescopeReactNative"
   }
@@ -162,6 +229,11 @@ private class ReactNativeDescopeLogger(
         .emit("descopeLog", body)
     }
   }
+}
+
+private fun Promise.rejectPasskey(e: Exception) = when (e) {
+  is DescopeException -> reject(e.code, e.desc, e)
+  else -> reject(DescopeException.passkeyFailed.code, e.message ?: DescopeException.passkeyFailed.desc, e)
 }
 
 private fun launchUri(context: Context, uri: Uri) {

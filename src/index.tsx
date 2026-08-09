@@ -9,4 +9,4 @@ export { default as useFlow } from './hooks/useFlow'
 
 export { getCurrentSessionToken, getCurrentRefreshToken, getCurrentUser } from './helpers'
 
-export type { DescopeSession, DescopeSessionManager, DescopeFlow, FlowOptions, DescopeError } from './types'
+export type { DescopeSession, DescopeSessionManager, DescopeFlow, DescopePasskey, FlowOptions, DescopeError } from './types'

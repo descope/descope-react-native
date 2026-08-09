@@ -1,8 +1,10 @@
 import createCoreSdk, { type ExtendedResponse } from '@descope/core-js-sdk'
 import { Platform } from 'react-native'
 import { version } from '../../../package.json'
+import { createPasskey } from './passkey'
 
 export type Sdk = ReturnType<typeof createSdk>
+export type CoreSdk = ReturnType<typeof createCoreSdk>
 export type SdkLogger = Parameters<typeof createCoreSdk>[0]['logger']
 export type SdkConfig = Parameters<typeof createCoreSdk>
 
@@ -16,7 +18,8 @@ export const createSdk = (...config: SdkConfig) => {
       config[0].hooks.transformResponse = parseCookies
     }
   }
-  return createCoreSdk(...config)
+  const coreSdk = createCoreSdk(...config)
+  return { ...coreSdk, passkey: createPasskey(coreSdk) }
 }
 
 const parseCookies = async (mutableResponse: ExtendedResponse) => {

@@ -12,6 +12,10 @@ jest.mock('../src/internal/modules/descopeModule', () => ({
   default: {
     loadItem: jest.fn().mockResolvedValue(null),
     configureLogging: jest.fn().mockResolvedValue(null),
+    passkeySupported: jest.fn().mockResolvedValue(true),
+    passkeyOrigin: jest.fn().mockResolvedValue(''),
+    passkeyCreate: jest.fn().mockResolvedValue(''),
+    passkeyAuthenticate: jest.fn().mockResolvedValue(''),
   },
 }))
 
