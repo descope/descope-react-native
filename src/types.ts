@@ -119,6 +119,75 @@ export interface DescopeSessionManager {
   updateUser(userResponse: UserResponse): Promise<void>
 }
 
+/**
+ * Authenticate users using a passkey (WebAuthn) with the platform authenticator,
+ * without running a flow.
+ *
+ * The authentication functions in this interface are all asynchronous operations
+ * that perform network requests before and after displaying the modal authentication
+ * view. It is thus recommended to show an activity indicator or switch the user interface
+ * to a loading state before calling these functions, otherwise the user might accidentally
+ * interact with the app when the authentication view is not being displayed.
+ *
+ * Passkeys require iOS 15 or Android 9 (API 28) at runtime, and associated domains (iOS)
+ * or Digital Asset Links (Android) to be configured. See the README for the full setup.
+ *
+ *     import { useDescope, useSession } from '@descope/react-native-sdk'
+ *
+ *     const descope = useDescope()
+ *     const { manageSession } = useSession()
+ *
+ *     const resp = await descope.passkey.signUpOrIn('andy@example.com')
+ *     manageSession(resp.data)
+ */
+export interface DescopePasskey {
+  /**
+   * Whether the current device supports passkeys.
+   *
+   * Call this before offering a passkey option, as the SDK itself supports OS versions
+   * older than passkeys require.
+   */
+  isSupported(): Promise<boolean>
+  /**
+   * Authenticates a new user by creating a new passkey.
+   *
+   * @param loginId What identifies the user when logging in, typically an email,
+   * phone, or any other unique identifier.
+   * @param name The user's display name. Unlike the other mobile SDKs it is required
+   * here, as the underlying `core-js-sdk` validates it as a non-empty string.
+   * @throws Rejects with `passkeyCancelled` if the authentication view is cancelled by the user.
+   */
+  signUp(loginId: string, name: string): Promise<SdkResponse<JWTResponse>>
+  /**
+   * Authenticates an existing user by prompting for an existing passkey.
+   *
+   * @param loginId What identifies the user when logging in, typically an email,
+   * phone, or any other unique identifier.
+   * @throws Rejects with `passkeyCancelled` if the authentication view is cancelled by the user.
+   */
+  signIn(loginId: string): Promise<SdkResponse<JWTResponse>>
+  /**
+   * Authenticates an existing user if one exists or creates a new one.
+   *
+   * A new passkey will be created if the user doesn't already exist, otherwise a passkey
+   * must be available on their device to authenticate with.
+   *
+   * @param loginId What identifies the user when logging in, typically an email,
+   * phone, or any other unique identifier.
+   * @throws Rejects with `passkeyCancelled` if the authentication view is cancelled by the user.
+   */
+  signUpOrIn(loginId: string): Promise<SdkResponse<JWTResponse>>
+  /**
+   * Updates an existing user by adding a new passkey as an authentication method.
+   *
+   * @param loginId What identifies the user when logging in, typically an email,
+   * phone, or any other unique identifier.
+   * @param refreshJwt The `refreshJwt` from an active `DescopeSession`.
+   * @throws Rejects with `passkeyCancelled` if the authentication view is cancelled by the user.
+   */
+  add(loginId: string, refreshJwt: string): Promise<SdkResponse<{ jwt?: JWTResponse }>>
+}
+
 /** An error that can return from various SDK operation */
 export type DescopeError = {
   errorCode: string

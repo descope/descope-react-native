@@ -5,6 +5,8 @@ import AuthenticationServices
 private let redirectScheme = "descopeauth"
 private let redirectURL = "\(redirectScheme)://flow"
 private let maxKeyWindowAttempts = 10
+private let passkeyUnsupportedCode = "passkey_unsupported"
+private let passkeyUnsupportedMessage = "Passkeys require iOS 15 or newer"
 
 @objc(DescopeReactNative)
 class DescopeReactNative: RCTEventEmitter {
@@ -51,6 +53,47 @@ class DescopeReactNative: RCTEventEmitter {
                 config.logger = logger
             }
             resolve(nil)
+        }
+    }
+
+    // Passkey
+
+    @objc(passkeySupported:rejecter:)
+    func passkeySupported(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        if #available(iOS 15.0, *) {
+            resolve(true)
+        } else {
+            resolve(false)
+        }
+    }
+
+    // the iOS SDK doesn't send an origin, the server infers it from the project's configured domain
+    @objc(passkeyOrigin:rejecter:)
+    func passkeyOrigin(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        resolve("")
+    }
+
+    @objc(passkeyCreate:withResolver:withRejecter:)
+    func passkeyCreate(_ options: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        guard #available(iOS 15.0, *) else { return reject(passkeyUnsupportedCode, passkeyUnsupportedMessage, nil) }
+        Task { @MainActor in
+            do {
+                resolve(try await Passkey.performRegister(options: options, logger: nil))
+            } catch {
+                rejectPasskey(reject, error)
+            }
+        }
+    }
+
+    @objc(passkeyAuthenticate:withResolver:withRejecter:)
+    func passkeyAuthenticate(_ options: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        guard #available(iOS 15.0, *) else { return reject(passkeyUnsupportedCode, passkeyUnsupportedMessage, nil) }
+        Task { @MainActor in
+            do {
+                resolve(try await Passkey.performAssertion(options: options, logger: nil))
+            } catch {
+                rejectPasskey(reject, error)
+            }
         }
     }
 
@@ -203,6 +246,13 @@ private extension Data {
         guard SecRandomCopyBytes(kSecRandomDefault, count, &bytes) == errSecSuccess else { return nil }
         self = Data(bytes: bytes, count: count)
     }
+}
+
+private func rejectPasskey(_ reject: RCTPromiseRejectBlock, _ error: Error) {
+    guard let error = error as? DescopeError else {
+        return reject(DescopeError.passkeyFailed.code, error.localizedDescription, error)
+    }
+    reject(error.code, error.message ?? error.desc, error)
 }
 
 private func prepareInitialRequest(for flowURL: String, with codeChallenge: String) throws -> URL {
