@@ -40,10 +40,15 @@ describe('hooks', () => {
   })
 
   describe('FlowView', () => {
-    const renderWithContext = (overrides: Partial<DescopeContext>) => {
+    const renderWithContext = (overrides: Partial<DescopeContext>, props: Partial<React.ComponentProps<typeof FlowView>> = {}) => {
       const value: DescopeContext = { projectId, setSession: () => {}, isSessionLoading: false, ...overrides }
       const ctxWrapper = ({ children }: { children: React.ReactNode }) => React.createElement(Context.Provider, { value }, children)
-      return render(React.createElement(FlowView, { flowOptions: { url: 'https://example.com/flow' } }), { wrapper: ctxWrapper })
+      return render(React.createElement(FlowView, { flowOptions: { url: 'https://example.com/flow' }, ...props }), { wrapper: ctxWrapper })
+    }
+
+    const finishFlow = (response: Record<string, unknown>, onSuccess: jest.Mock) => {
+      const tree = renderWithContext({}, { onSuccess }).toJSON() as { props: { onFlowSuccess: (event: unknown) => void } }
+      tree.props.onFlowSuccess({ nativeEvent: { response: JSON.stringify(response) } })
     }
 
     it('defers rendering the native view while the persisted session is loading', () => {
@@ -59,6 +64,26 @@ describe('hooks', () => {
     it('does not pass session to the native view when no session exists', () => {
       const tree = renderWithContext({ session: undefined }).toJSON() as { props: { session?: unknown } } | null
       expect(tree?.props.session).toBeUndefined()
+    })
+
+    const flowOutput = { key: 'value', count: 3, nested: { inner: true } }
+
+    it('passes the flow output through when it arrives as an object', () => {
+      const onSuccess = jest.fn()
+      finishFlow({ sessionJwt: 'abc', refreshJwt: 'def', flowOutput }, onSuccess)
+      expect(onSuccess).toHaveBeenCalledWith(expect.objectContaining({ flowOutput }))
+    })
+
+    it('parses the flow output when it arrives as a JSON string', () => {
+      const onSuccess = jest.fn()
+      finishFlow({ sessionJwt: 'abc', refreshJwt: 'def', flowOutput: JSON.stringify(flowOutput) }, onSuccess)
+      expect(onSuccess).toHaveBeenCalledWith(expect.objectContaining({ flowOutput }))
+    })
+
+    it('defaults the flow output to an empty object when the flow sets none', () => {
+      const onSuccess = jest.fn()
+      finishFlow({ sessionJwt: 'abc', refreshJwt: 'def' }, onSuccess)
+      expect(onSuccess).toHaveBeenCalledWith(expect.objectContaining({ flowOutput: {} }))
     })
   })
 
