@@ -1,9 +1,8 @@
-import type { JWTResponse } from '@descope/core-js-sdk'
 import React, { useCallback, useMemo, type SyntheticEvent } from 'react'
 import { requireNativeComponent, type HostComponent, type ViewStyle } from 'react-native'
 import { version } from '../../package.json'
 import useDescopeContext from '../internal/hooks/useContext'
-import type { DescopeError, FlowOptions } from '../types'
+import type { DescopeError, FlowJwtResponse, FlowOptions } from '../types'
 
 type FlowSession = {
   sessionJwt: string
@@ -82,7 +81,7 @@ const DescopeFlowView = requireNativeComponent('DescopeFlowView') as HostCompone
  * a set of callbacks when the Flow is `ready` to be presented, and finished in a `success` or `error` state.
  * @returns The Descope FlowView component
  */
-export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: string; style?: ViewStyle; onReady?: () => unknown; onSuccess?: (jwtResponse: JWTResponse) => unknown; onError?: (error: DescopeError) => unknown }) {
+export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: string; style?: ViewStyle; onReady?: () => unknown; onSuccess?: (jwtResponse: FlowJwtResponse) => unknown; onError?: (error: DescopeError) => unknown }) {
   const { onReady, onSuccess, onError } = props
   const { session, isSessionLoading } = useDescopeContext()
 
@@ -91,7 +90,10 @@ export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: s
   const onSuccessHook = useCallback(
     (event: SyntheticEvent<never, { response: string }>) => {
       const rawResponse = JSON.parse(event.nativeEvent.response)
-      const jwtResponse = rawResponse as JWTResponse
+      // Both platforms omit the flow output when the flow doesn't set one. Android sends it as an
+      // object, while iOS encodes it as a JSON string, as the swift SDK does for its own Codable.
+      const flowOutput = typeof rawResponse.flowOutput === 'string' ? JSON.parse(rawResponse.flowOutput) : (rawResponse.flowOutput ?? {})
+      const jwtResponse = { ...rawResponse, flowOutput } as FlowJwtResponse
       // For authenticated flows - the session tokens from the current active session are used to authenticate
       // the user inside the flow, while the user object itself is unaffected. However, since the user is an integral
       // part of the session construct, a placeholder user is used by the native layer. When a flow finishes without

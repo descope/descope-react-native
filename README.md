@@ -348,6 +348,19 @@ const flowUrl = 'https://myflowUrl.com'
 />
 ```
 
+### Flow Output
+
+Flows can return custom data by setting a flow output in the Descope console. When present,
+it's available on the `flowOutput` field of the response the flow finishes with. The object
+is empty for authentications that don't originate from a flow.
+
+```js
+onSuccess={async (jwtResponse) => {
+  const orgId = jwtResponse.flowOutput.organizationId as string | undefined
+  // ...
+}}
+```
+
 ## Use the `useDescope` and `useSession` hooks in your components in order to get authentication state, user details and utilities
 
 This can be helpful to implement application-specific logic. Examples:

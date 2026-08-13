@@ -196,6 +196,7 @@ private fun AuthenticationResponse.toJsonString(): String {
     put("user", user.toJson())
     put("firstSeen", isFirstAuthentication)
     externalToken?.run { put("externalToken", this) }
+    if (flowOutput.isNotEmpty()) put("flowOutput", flowOutput.toJsonObject())
   }
   return json.toString()
 }

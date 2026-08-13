@@ -195,6 +195,16 @@ export type DescopeError = {
   errorMessage?: string
 }
 
+/**
+ * Custom data returned from a flow's output, when running a flow that sets it.
+ *
+ * This is always empty for authentications that don't originate from a flow.
+ */
+export type FlowOutput = Record<string, unknown>
+
+/** The `JWTResponse` a flow finishes with, alongside any custom data set by the flow's output. */
+export type FlowJwtResponse = JWTResponse & { flowOutput: FlowOutput }
+
 /** Provide authentication info if the flow is being run by a user that's already authenticated. */
 export type FlowAuthentication = {
   /** The ID of the flow about to be run. */
