@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.0](https://github.com/descope/descope-react-native/compare/v0.11.1...v0.12.0) (2026-08-13)
+
+
+### Features
+
+* bump native SDKs and surface externalToken from flows ([#177](https://github.com/descope/descope-react-native/issues/177)) ([e75f496](https://github.com/descope/descope-react-native/commit/e75f49639808250f329879cdf369a7de09206b25))
+* support native passkeys without running a flow ([#182](https://github.com/descope/descope-react-native/issues/182)) ([502e96b](https://github.com/descope/descope-react-native/commit/502e96b0948c53fd1c21756050d6ce3e7fe8187e))
+* surface flowOutput from flows ([#183](https://github.com/descope/descope-react-native/issues/183)) ([4e4bb37](https://github.com/descope/descope-react-native/commit/4e4bb373fb9e3280247fa947af580cb2ef872d63))
+
+
+### Bug Fixes
+
+* **ci:** prevent script injection in update-release-lockfiles workflow ([#181](https://github.com/descope/descope-react-native/issues/181)) ([5a267a7](https://github.com/descope/descope-react-native/commit/5a267a70a43de0d03cc79e36b410127f920f20d6))
+
 ## [0.11.1](https://github.com/descope/descope-react-native/compare/v0.11.0...v0.11.1) (2026-06-09)
 
 
