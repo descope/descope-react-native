@@ -141,15 +141,18 @@ extension FlowBridge {
         nativeOptions.oauthProvider = flow.oauthNativeProvider?.name ?? ""
         nativeOptions.magicLinkRedirect = flow.magicLinkRedirect ?? ""
 
+        // take one session snapshot so refreshJwt and sessionJwt can't come from different sessions
+        let session = flow.providedSession
+
         var refreshJwt = ""
-        if let session = flow.providedSession {
+        if let session {
             logger.info("Passing refreshJwt to flow initialization", session.refreshJwt)
             refreshJwt = session.refreshJwt
         }
 
         // only sent when the host app opted in via sendSessionToken (bridge v4+ web components use it);
         // an expired session token is skipped so the flow never sees stale claims
-        if flow.sendSessionToken, let session = flow.providedSession, !session.sessionToken.isExpired {
+        if flow.sendSessionToken, let session, !session.sessionToken.isExpired {
             logger.info("Passing sessionJwt to flow initialization")
             nativeOptions.sessionJwt = session.sessionJwt
         }
