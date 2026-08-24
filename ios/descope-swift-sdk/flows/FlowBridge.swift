@@ -147,8 +147,9 @@ extension FlowBridge {
             refreshJwt = session.refreshJwt
         }
 
-        // only sent when the host app opted in via sendSessionToken (bridge v4+ web components use it)
-        if flow.sendSessionToken, let session = flow.providedSession {
+        // only sent when the host app opted in via sendSessionToken (bridge v4+ web components use it);
+        // an expired session token is skipped so the flow never sees stale claims
+        if flow.sendSessionToken, let session = flow.providedSession, !session.sessionToken.isExpired {
             logger.info("Passing sessionJwt to flow initialization")
             nativeOptions.sessionJwt = session.sessionJwt
         }
