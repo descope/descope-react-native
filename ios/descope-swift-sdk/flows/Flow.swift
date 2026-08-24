@@ -147,6 +147,14 @@ public class DescopeFlow {
     ///     This is especially important for projects that use refresh token rotation.
     public var sessionProvider: (() -> DescopeSession?)?
 
+    /// Whether to send the current session JWT on flow start/next requests, exposing
+    /// its validated claims to the flow via the `sessionJwtClaims` context key
+    /// (e.g. checking the `su` step-up claim). Off by default.
+    ///
+    /// The session is taken from the ``sessionProvider`` or the SDK's session manager,
+    /// same as for authenticated flows.
+    public var sendSessionToken: Bool = false
+
     /// Creates a new ``DescopeFlow`` object that encapsulates a single flow run.
     ///
     /// - Parameter url: The URL where the flow is hosted.

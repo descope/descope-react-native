@@ -76,6 +76,9 @@ class DescopeFlowViewManager() : SimpleViewManager<DescopeFlowView>(), DescopeFl
       src.forEach { (k, v) -> v?.let { target[k] = it } }
       descopeFlow.clientInputs = target
     }
+    if (options.hasKey("sendSessionToken")) {
+      descopeFlow.sendSessionToken = options.getBoolean("sendSessionToken")
+    }
     descopeFlow.hooks = listOf(
             runJavaScript(DescopeFlowHook.Event.Loaded, """
                 window.descopeBridge.hostInfo.sdkName = 'reactnative'

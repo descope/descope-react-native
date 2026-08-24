@@ -146,6 +146,12 @@ extension FlowBridge {
             logger.info("Passing refreshJwt to flow initialization", session.refreshJwt)
             refreshJwt = session.refreshJwt
         }
+
+        // only sent when the host app opted in via sendSessionToken (bridge v4+ web components use it)
+        if flow.sendSessionToken, let session = flow.providedSession {
+            logger.info("Passing sessionJwt to flow initialization")
+            nativeOptions.sessionJwt = session.sessionJwt
+        }
         
         var clientInputs = ""
         if !flow.clientInputs.isEmpty {
@@ -451,6 +457,7 @@ private struct FlowNativeOptions: Encodable {
     var ssoRedirect = WebAuth.redirectURL
     var externalAuthRedirect = WebAuth.redirectURL
     var magicLinkRedirect = ""
+    var sessionJwt: String?
 
     var payload: String {
         guard let data = try? JSONEncoder().encode(self), let value = String(bytes: data, encoding: .utf8) else { return "{}" }
