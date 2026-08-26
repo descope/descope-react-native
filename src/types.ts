@@ -218,14 +218,6 @@ export type FlowOptions = {
   /** The URL where the flow is hosted */
   url: string
   /**
-   * Whether to send the current session JWT on flow start/next requests, exposing
-   * its validated claims to the flow via the `sessionJwtClaims` context key
-   * (e.g. checking the `su` step-up claim). Off by default.
-   *
-   * Requires the hosted flow page to run web component bridge v4 or later.
-   */
-  sendSessionToken?: boolean
-  /**
    * The ID of the oauth provider that is configured to natively "Sign In with Google".
    * Will likely be "google" if the Descope "Google" provider was customized,
    * or alternatively a custom provider ID.

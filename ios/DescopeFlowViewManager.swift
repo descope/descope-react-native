@@ -54,9 +54,6 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
         if let clientInputs = options["clientInputs"] as? [String: Any] {
             descopeFlow.clientInputs = clientInputs
         }
-        if let sendSessionToken = options["sendSessionToken"] as? Bool {
-            descopeFlow.sendSessionToken = sendSessionToken
-        }
         descopeFlow.hooks = [
             .runJavaScript(on: .loaded, code: """
                 window.descopeBridge.hostInfo.sdkName = 'reactnative'
