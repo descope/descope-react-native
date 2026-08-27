@@ -177,6 +177,11 @@ extension FlowBridge {
         call(function: "updateRefreshJwt", params: refreshJwt)
     }
 
+    /// Called by the coordinator when it needs to update the session token in the page.
+    func updateSessionJwt(_ sessionJwt: String) {
+        call(function: "updateSessionJwt", params: sessionJwt)
+    }
+
     /// Called by the coordinator when it's done handling a bridge request
     func postResponse(_ response: FlowBridgeResponse) {
         call(function: "handleResponse", params: response.type, response.payload)
@@ -662,11 +667,14 @@ window.descopeBridge = {
 
         updateSessionJwt(sessionJwt) {
             // the session JWT is only made available to web components that opted in
-            // via the send-session-token attribute
+            // via the send-session-token attribute; cleared otherwise so a value from
+            // a previous session never lingers in the page's persistent storage
+            const storagePrefix = this.component.storagePrefix || ''
+            const storageKey = `${storagePrefix}\(DescopeClient.sessionCookieName)`
             if (sessionJwt && this.component.getAttribute('send-session-token') === 'true') {
-                const storagePrefix = this.component.storagePrefix || ''
-                const storageKey = `${storagePrefix}\(DescopeClient.sessionCookieName)`
                 window.localStorage.setItem(storageKey, sessionJwt)
+            } else {
+                window.localStorage.removeItem(storageKey)
             }
         },
 
