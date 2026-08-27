@@ -150,12 +150,13 @@ extension FlowBridge {
             refreshJwt = session.refreshJwt
         }
 
-        // passed to the web component like the refresh JWT; the web component decides
-        // whether to send it on flow requests (send-session-token). An expired session
+        // injected into the page's local storage like the refresh JWT, but only for
+        // web components that opted in via send-session-token. An expired session
         // token is skipped so the flow never sees stale claims
+        var sessionJwt = ""
         if let session, !session.sessionToken.isExpired {
             logger.info("Passing sessionJwt to flow initialization")
-            nativeOptions.sessionJwt = session.sessionJwt
+            sessionJwt = session.sessionJwt
         }
         
         var clientInputs = ""
@@ -168,7 +169,7 @@ extension FlowBridge {
             }
         }
         
-        call(function: "initialize", params: nativeOptions.payload, refreshJwt, clientInputs)
+        call(function: "initialize", params: nativeOptions.payload, refreshJwt, sessionJwt, clientInputs)
     }
 
     /// Called by the coordinator when it needs to update the refresh token in the page.
@@ -462,7 +463,6 @@ private struct FlowNativeOptions: Encodable {
     var ssoRedirect = WebAuth.redirectURL
     var externalAuthRedirect = WebAuth.redirectURL
     var magicLinkRedirect = ""
-    var sessionJwt: String?
 
     var payload: String {
         guard let data = try? JSONEncoder().encode(self), let value = String(bytes: data, encoding: .utf8) else { return "{}" }
@@ -564,12 +564,13 @@ window.descopeBridge = {
             return true
         },
 
-        initialize(nativeOptions, refreshJwt, clientInputs) {
+        initialize(nativeOptions, refreshJwt, sessionJwt, clientInputs) {
             // update webpage sdk headers and print sdk type and version to native log
             this.updateConfigHeaders()
 
             this.component.nativeOptions = JSON.parse(nativeOptions)
             this.updateRefreshJwt(refreshJwt)
+            this.updateSessionJwt(sessionJwt)
             this.updateClientInputs(clientInputs)
             
             if (this.component.flowStatus === 'error') {
@@ -656,6 +657,16 @@ window.descopeBridge = {
                 const storagePrefix = this.component.storagePrefix || ''
                 const storageKey = `${storagePrefix}\(DescopeClient.refreshCookieName)`
                 window.localStorage.setItem(storageKey, refreshJwt)
+            }
+        },
+
+        updateSessionJwt(sessionJwt) {
+            // the session JWT is only made available to web components that opted in
+            // via the send-session-token attribute
+            if (sessionJwt && this.component.getAttribute('send-session-token') === 'true') {
+                const storagePrefix = this.component.storagePrefix || ''
+                const storageKey = `${storagePrefix}\(DescopeClient.sessionCookieName)`
+                window.localStorage.setItem(storageKey, sessionJwt)
             }
         },
 
