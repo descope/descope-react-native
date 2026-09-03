@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/descope/descope-react-native/compare/v0.12.0...v0.13.0) (2026-09-02)
+
+
+### Features
+
+* pass the session JWT to the flow web component ([#184](https://github.com/descope/descope-react-native/issues/184)) ([9fffee0](https://github.com/descope/descope-react-native/commit/9fffee0332cc3ffba334b636a10819c497962432))
+
 ## [0.12.0](https://github.com/descope/descope-react-native/compare/v0.11.1...v0.12.0) (2026-08-13)
 
 
