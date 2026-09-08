@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://github.com/descope/descope-react-native/compare/v0.13.0...v0.13.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* bump @descope/core-js-sdk to 2.70.1 ([#188](https://github.com/descope/descope-react-native/issues/188)) ([7dd50a3](https://github.com/descope/descope-react-native/commit/7dd50a32025c4a7c661f998edfd246638b2d50b0)), closes [#187](https://github.com/descope/descope-react-native/issues/187)
+
 ## [0.13.0](https://github.com/descope/descope-react-native/compare/v0.12.0...v0.13.0) (2026-09-02)
 
 
