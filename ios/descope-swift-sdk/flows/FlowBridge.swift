@@ -243,7 +243,7 @@ extension FlowBridge {
             logger.error("Bridge received failure event", message.body)
             if let dict = message.body as? [String: Any], var error = DescopeError(errorResponse: dict) {
                 if error.code == "E102122" { // convert server-side flow aborted error to client-side flow cancelled error
-                    error = DescopeError.flowCancelled.with(message: error.message)
+                    error = DescopeError.flowCancelled.with(message: error.message, traceId: error.traceId)
                 }
                 delegate?.bridgeDidFailAuthentication(self, error: error)
             } else if let reason = message.body as? String, !reason.isEmpty {

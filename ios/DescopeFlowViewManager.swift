@@ -92,6 +92,9 @@ class DescopeFlowViewWrapper: DescopeFlowView, DescopeFlowViewDelegate {
         if let message = error.message {
             errorInfo["errorMessage"] = message
         }
+        if let traceId = error.traceId {
+            errorInfo["traceId"] = traceId
+        }
         onFlowError?(errorInfo)
     }
     

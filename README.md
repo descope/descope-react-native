@@ -342,7 +342,7 @@ const flowUrl = 'https://myflowUrl.com'
       // handle session management error
     }
   }}
-  onError={(error: string) => {
+  onError={(error: DescopeError) => {
     // handle flow errors here
   }}
 />
@@ -359,6 +359,24 @@ onSuccess={async (jwtResponse) => {
   const orgId = jwtResponse.flowOutput.organizationId as string | undefined
   // ...
 }}
+```
+
+### Error Trace IDs
+
+Errors from failed network requests carry an optional `traceId` with the value of the
+`CF-Ray` response header. Log it or send it to support to help trace a specific failure.
+It's available on flow errors and on SDK call errors, and the `logger` prints it as part
+of the response headers.
+
+```js
+onError={(error) => {
+  MyMonitoringService.error(error.errorCode, error.traceId)
+}}
+
+const res = await descope.otp.verify.email(loginId, code)
+if (!res.ok) {
+  MyMonitoringService.error(res.error?.errorCode, res.error?.traceId)
+}
 ```
 
 ## Use the `useDescope` and `useSession` hooks in your components in order to get authentication state, user details and utilities

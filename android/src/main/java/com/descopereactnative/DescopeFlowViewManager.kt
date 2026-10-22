@@ -179,6 +179,7 @@ class ErrorEvent(
     putString("errorCode", exception.code)
     putString("errorDescription", exception.desc)
     putString("errorMessage", exception.message)
+    exception.traceId?.let { putString("traceId", it) }
   }
 }
 
