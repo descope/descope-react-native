@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/descope/descope-react-native/compare/v0.13.1...v0.14.0) (2026-10-22)
+
+
+### Features
+
+* bump SDKs and surface traceId on flow errors ([#190](https://github.com/descope/descope-react-native/issues/190)) ([8570021](https://github.com/descope/descope-react-native/commit/8570021f4a094a262bd91f59b8d87597eb22ae85))
+
 ## [0.13.1](https://github.com/descope/descope-react-native/compare/v0.13.0...v0.13.1) (2026-09-08)
 
 
