@@ -193,6 +193,7 @@ export type DescopeError = {
   errorCode: string
   errorDescription: string
   errorMessage?: string
+  traceId?: string
 }
 
 /**

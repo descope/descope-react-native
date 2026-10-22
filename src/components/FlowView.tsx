@@ -12,7 +12,7 @@ type FlowSession = {
 type DescopeFlowView = {
   onFlowReady?: () => void
   onFlowSuccess?: (event: SyntheticEvent<never, { response: string }>) => void
-  onFlowError?: (event: SyntheticEvent<never, { errorCode: string; errorDescription: string; errorMessage?: string }>) => void
+  onFlowError?: (event: SyntheticEvent<never, { errorCode: string; errorDescription: string; errorMessage?: string; traceId?: string }>) => void
   flowOptions?: FlowOptions & { sdkVersion?: string }
   session?: FlowSession
 }
@@ -108,11 +108,12 @@ export default function FlowView(props: { flowOptions: FlowOptions; deepLink?: s
   )
 
   const onErrorHook = useCallback(
-    (event: SyntheticEvent<never, { errorCode: string; errorDescription: string; errorMessage?: string }>) => {
+    (event: SyntheticEvent<never, { errorCode: string; errorDescription: string; errorMessage?: string; traceId?: string }>) => {
       const error = {
         errorCode: event.nativeEvent.errorCode,
         errorDescription: event.nativeEvent.errorDescription,
         errorMessage: event.nativeEvent.errorMessage,
+        traceId: event.nativeEvent.traceId,
       }
       onError?.(error)
     },

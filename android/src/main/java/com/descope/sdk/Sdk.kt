@@ -22,7 +22,6 @@ import com.descope.internal.routes.Sso
 import com.descope.internal.routes.Totp
 import com.descope.internal.others.with
 import com.descope.session.DescopeSessionManager
-import com.descope.session.SessionLifecycle
 import com.descope.session.SessionStorage
 import com.descope.types.DescopeException
 
@@ -93,8 +92,7 @@ class DescopeSdk(context: Context, projectId: String, configure: DescopeConfig.(
 
     private fun initDefaultManager(context: Context, config: DescopeConfig): DescopeSessionManager {
         val storage = SessionStorage(context.applicationContext, config.projectId, config.logger)
-        val lifecycle = SessionLifecycle(auth, config.logger)
-        return DescopeSessionManager(storage, lifecycle)
+        return DescopeSessionManager(storage, auth, config.logger)
     }
 
     // SDK information
@@ -104,6 +102,6 @@ class DescopeSdk(context: Context, projectId: String, configure: DescopeConfig.(
         const val NAME = "DescopeAndroid"
 
         /** The Descope SDK version */
-        const val VERSION = "0.21.0" // x-release-please-version
+        const val VERSION = "0.23.0" // x-release-please-version
     }
 }
